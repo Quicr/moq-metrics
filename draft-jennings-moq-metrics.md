@@ -1,19 +1,296 @@
+---
+normative:
+MOQT: draft-ietf-moq-transport-03
+---
 
 # Abstract
 
-Many system produce significant volumes of metrics which do not need may
-not be needed. Transporting these over a publish / subscribe
-architecture like MoQ allows local nodes to cache the metric values. If
-they values are later needed in a new subscription can fetch only the
-value that are needed. This allows for a "just in time" delivery of
-metrics and reduces transfer of metrics that are not needed.
-
+Many systems produce significant volumes of metrics that often 
+cause congestion with the primary application in low-bandwidth networks.
+During congestion or when the network is unavailable, metrics can be lost.
+When considering that the application producing metrics may have congestion,
+network outage, or be abruptly closed, sending metrics near real-time is
+preferred. The challenge with sending metrics near real-time is that
+metrics can cause network congestion for the application resulting
+in both the application under performing and failing to prioritize 
+metrics produced under these conditions.  This document defines how
+metrics are produced and consumed using Media over Quic Transport (MOQT)
+to overcome metric caused congestion with the ability to prioritize
+both metrics and application data. 
 
 # Introduction
 
 Each device that produces metrics publishes the metrics with MoQT. The
 time series are put in different tracks and individual objects contain
 the values at a given timestamp.
+
+## Track Namespace and Names
+
+{{!MOQT, Section 5.2}} defines that track namespace will be used by relays
+to route objects to subscribers. Track name provides per stream forwarding
+and subscription filtering of published objects to a namespace. 
+
+
+
+### Track Namespace
+
+Track namespaces identifies metrics being produced by a source
+
+~~~
+Namespace {
+  prefix (i),
+  targetId (i),
+  collectionId (i),
+  sourceKindId (i),
+  sourceId (b), 
+}
+~~~
+
+* **prefix** uniquely identifies namespace is for metrics
+* **targetId** user-defined id to indicate the target where metrics are to be
+               collected, such as a region id
+* **collectionId** is user-defined collection ID that identifies a high level
+                 collection set of metrics (e.g., media10x, webex calling, webex meetings)  
+* **sourceKindId** is a user-defined kind ID of device that is producing the metrics
+                (e.g., m10x-client, m10x-studio, mcu, sfu)
+* **sourceId** user-defined unique source Id sending the metrics, can be device or user scoped ID
+
+### Track Name
+
+Track name identifies a producer of data. The namespace is encoded as:
+
+~~~
+Name {
+  version (i)
+}
+~~~
+
+* **version of the schema**  Version of the schema used. This specification defines version 1.
+
+### Wildcards
+
+MOQT doesn't support wildcards and a namespace needs to be scoped to a source (e.g., sourceId)
+
+Need some level of discovery. 
+
+## Transmission Mode
+
+Stream per track
+
+## Data Model
+
+### Group Id
+
+Group ID is time. Time is represented by an integer with number of microseconds since "1
+Jan 1972" using NTP Era zero conventions.
+Group ID increments for every object.
+
+Time supports going back in time to get metrics it also solves a problem with the same
+source Id starting over (e.g., application restart).
+
+### Object Id
+
+Object increments for each message/metric
+
+#### Serialization / Deserialization 
+
+JSON vs Avro vs Protobufs / custom TLV based 
+
+The message encoding is JSON. Serialization of JSON is a selection for implementation,
+which can be identified using track name `typeId`.   
+
+#### Required Serialization
+
+Several serializations can be used, such as Avro, CBOR, protobufs, TSV/CSV,
+custom TLV, etc. This specification requires that atleast JSON lines
+serialization is supported. JSON lines serialization is used for its
+simplicity and streaming nature. 
+
+JSON lines are serialized as follows:
+
+* Metrics Schema is encoded using a JSON object 
+* JSON objects are encoded by stripping whitespaces, tabs, and newlines to
+  form a compact JSON line
+* One or more objects can be serialized using a newline (`\r\n`) as
+  the delimiter between objects
+* The presence of a newline (`\r\n`) suggests another object to follow
+
+### Batching and Compression 
+
+senML - 
+
+### Schema
+
+lengths?? ranges ??? enum???
+
+int vs uint has been a problem in the past with schemas. 
+
+* timestamp (ts) - unix time of the measurement  
+* timestamp precision (tp) - Timestamp value precision 
+* attribute_type (at) - Attribute type is optional. If not specified it is type **label**  
+* attribute_name (an) - Name of the attribute. 
+* attr_value (av) - Attribute value is optional. If the value is null, then the name is the value.
+* metric_name (mn) - Name of the metric
+* metric_value (mv) - The value of the metric/sample
+* metric_type (mt)- Datatype, which can be gauge32, guage64, counter32, counter64, uint64, ipv4, ...
+
+#### Timestamp
+
+Timestamp is a 64bit unsigned integer value of time from Jan 1, 1970. 
+
+Timestamp precision specifies the value as seconds (s), milliseconds (m),
+microseconds (u), or nanoseconds (n). 
+
+#### Attribute Types
+
+| Type Long Name          | Type Short Name | Value Data Type | Details                                                                                           |
+|-------------------------|-----------------|-----------------|---------------------------------------------------------------------------------------------------|
+| label                   | l               | string          | Searchable string for the metrics. This would map to `tag` in InfluxDB and `label` in  Prometheus |
+| influx_measurement_name | imn             | string          | InfluxDB measurement name                                                                         |
+
+#### JSON Schema
+
+Version 1.
+
+```json
+{
+    "ts": 12234,
+    "tp": "<precision>",
+    "attrs": [
+      {
+        "an": "<name>",
+        "av": "<value>",
+        "at": "label"
+      }
+    ],
+    "metrics": [
+      {
+        "mn": "<string>",
+        "mt": "<datatype>",
+        "mv": <value>
+      }
+    ]
+}
+```
+
+#### JSON Example
+
+##### JSON pretty print
+```json
+{
+  "ts": 1715811793881,
+  "tp": "m",
+  "attrs": [
+    { 
+      "at": "imn",
+      "an": "m10x-connection"
+    },
+    {
+      "an": "endpoint_id",
+      "av": "tim@cisco.com"
+    },
+    {
+      "an": "relay_the_name",
+      "av": "local-pi-abc123"
+    },
+    {
+      "an": "source",
+      "av": "client"
+    },
+    {
+      "an": "connection_id",
+      "av": "11007afc02289e77"
+    }
+  ],
+  "metrics": [
+    {
+      "mn": "tx_retransmits",
+      "mt": "counter64",
+      "mv": 28
+    },
+    {
+      "mn": "tx_rate_bps_min",
+      "mt": "gauge64",
+      "mv": 1000
+    },
+    {
+      "mn": "tx_rate_bps_max",
+      "mt": "gauge64",
+      "mv": 3000
+    },
+    {
+      "mn": "tx_rate_bps_avg",
+      "mt": "gauge64",
+      "mv": 2000
+    }
+  ]
+}
+
+{
+  "ts": 1715812331305,
+  "tp": "m",
+  "cn": "m10x-connection",
+  "dims": [
+    {
+      "dn": "endpoint_id",
+      "dv": "tim@cisco.com"
+    },
+    {
+      "dn": "relay_id",
+      "dv": "local-pi-abc123"
+    },
+    {
+      "dn": "source",
+      "dv": "client"
+    },
+    {
+      "dn": "connection_id",
+      "dv": "11007afc02289e77"
+    }
+  ],
+  "metrics": [
+    {
+      "mn": "tx_retransmits",
+      "mt": "counter64",
+      "mv": 49
+    },
+    {
+      "mn": "tx_rate_bps_min",
+      "mt": "gauge64",
+      "mv": 1200
+    },
+    {
+      "mn": "tx_rate_bps_max",
+      "mt": "gauge64",
+      "mv": 9000
+    },
+    {
+      "mn": "tx_rate_bps_avg",
+      "mt": "gauge64",
+      "mv": 1800
+    }
+  ]
+}
+```
+
+##### JSON serialized
+
+```
+{"ts":1715811793881,"tp":"m","cn":"m10x-connection","dims":[{"dn":"endpoint_id","dv":"tim@cisco.com"},{"dn":"relay_id","dv":"local-pi-abc123"},{"dn":"source","dv":"client"},{"dn":"connection_id","dv":"11007afc02289e77"}],"metrics":[{"mn":"tx_retransmits","mt":"counter64","mv":28},{"mn":"tx_rate_bps_min","mt":"gauge64","mv":1000},{"mn":"tx_rate_bps_max","mt":"gauge64","mv":3000},{"mn":"tx_rate_bps_avg","mt":"gauge64","mv":2000}]}
+{"ts":1715812331305,"tp":"m","cn":"m10x-connection","dims":[{"dn":"endpoint_id","dv":"tim@cisco.com"},{"dn":"relay_id","dv":"local-pi-abc123"},{"dn":"source","dv":"client"},{"dn":"connection_id","dv":"11007afc02289e77"}],"metrics":[{"mn":"tx_retransmits","mt":"counter64","mv":49},{"mn":"tx_rate_bps_min","mt":"gauge64","mv":1200},{"mn":"tx_rate_bps_max","mt":"gauge64","mv":9000},{"mn":"tx_rate_bps_avg","mt":"gauge64","mv":1800}]}
+```
+
+##### Well known attribute
+
+Type | Name         | Value  | Details 
+---- |--------------|--------| -------
+tag | name for tag | string | Always a string value  
+
+---
+
+Every source publish an info ID before metrics. The sourceId is used to correlate info
+to track (namespace/name). 
+
 
 # Data Model
 
@@ -29,7 +306,6 @@ representing counter or gauge. Can have an optional type
 measurement_type that is gauge or value. Can have optional
 measurement_unit.
 
-attribute_name, attribute_value (AKA dimension). 
 
 
 ### Device ID
