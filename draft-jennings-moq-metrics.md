@@ -20,9 +20,44 @@ both metrics and application data.
 
 # Introduction
 
-Each device that produces metrics publishes the metrics with MoQT. The
-time series are put in different tracks and individual objects contain
-the values at a given timestamp.
+Each device that produces metrics publishes the metrics with MoQT. Metrics
+are placed into different tracks based on their schema. Each track identifies
+a schema so that subscribers can consistently process the schema without
+having to detect the schema per received object. 
+
+Traditionally, metrics are attribute/value pairs where the attribute is
+the metric name and value is the value of the metric.  Popular metric
+collectors use a very basic metric data model that conveys metric
+name/value and associated labels that maybe used for searching, such
+as a dimension. This data model works well for metrics being consumed
+by a simple time series database, but it does not address other metric
+subscriber use-cases.  
+
+```mermaid
+mindmap
+  root((**Metrics Endpoint**))
+    RELAY)MOTQ Relays(
+        TSDB(**Metrics Database**)
+          InfluxDB
+          Prometheus
+          Opensearch 
+        AI(Analytics)
+          Flink
+          Spark
+        SECMON(**Security Monitor**)
+          Connections
+        BILL(**Billing**)
+          Connections
+          Packets and Bytes Usage
+```
+
+Other use-cases may require additional attributes that identify actions,
+filters, labels, geographic coordinates, ... 
+
+## Security
+
+Subscriber services are often operated by a different teams or company that
+is different than the team responsible for the metrics endpoint. 
 
 ## Track Namespace and Names
 
@@ -48,9 +83,10 @@ Namespace {
 
 * **prefix** uniquely identifies namespace is for metrics
 * **targetId** user-defined id to indicate the target where metrics are to be
-               collected, such as a region id
+               collected, such as a region id. AKA scope
 * **collectionId** is user-defined collection ID that identifies a high level
-                 collection set of metrics (e.g., media10x, webex calling, webex meetings)  
+                 collection set of metrics (e.g., media10x, webex calling, webex meetings)
+                 Map to some well known set, such as appid/otel 
 * **sourceKindId** is a user-defined kind ID of device that is producing the metrics
                 (e.g., m10x-client, m10x-studio, mcu, sfu)
 * **sourceId** user-defined unique source Id sending the metrics, can be device or user scoped ID
@@ -61,11 +97,14 @@ Track name identifies a producer of data. The namespace is encoded as:
 
 ~~~
 Name {
-  version (i)
+  version (i),
+  schemaId (i)
 }
 ~~~
 
-* **version of the schema**  Version of the schema used. This specification defines version 1.
+* **version**  Version of the data model used. This specification defines version 1.
+
+> [!NOTE] Need to check into track names for upgrades
 
 ### Wildcards
 
@@ -77,7 +116,7 @@ Need some level of discovery.
 
 Stream per track
 
-## Data Model
+## Data Model and Base Schema
 
 ### Group Id
 
@@ -117,8 +156,6 @@ JSON lines are serialized as follows:
 
 ### Batching and Compression 
 
-senML - 
-
 ### Schema
 
 lengths?? ranges ??? enum???
@@ -154,12 +191,12 @@ Version 1.
 
 ```json
 {
+    
     "ts": 12234,
     "tp": "<precision>",
     "attrs": [
       {
-        "an": "<name>",
-        "av": "<value>",
+        "<name>" : "<value>",
         "at": "label"
       }
     ],
@@ -186,8 +223,7 @@ Version 1.
       "an": "m10x-connection"
     },
     {
-      "an": "endpoint_id",
-      "av": "tim@cisco.com"
+      "endpoint_id" : "tim@cisco.com"
     },
     {
       "an": "relay_the_name",
