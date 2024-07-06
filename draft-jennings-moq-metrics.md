@@ -1,5 +1,30 @@
+%%%
+title = "Metrics over Media over QUIC Transport"
+abbrev = "moqt-metrics"
+ipr= "trust200902"
+area = "art"
+workgroup = ""
+keyword = ["metrics","moq"]
 
-# Abstract
+[seriesInfo]
+status = "informational"
+name = "Internet-Draft"
+value = "draft-jennings-moq-metrics"
+stream = "IETF"
+
+[[author]]
+initials="C."
+surname="Jennings"
+fullname="Cullen Jennings"
+organization = "cisco"
+[author.address]
+email = "fluffy@iii.ca"
+[author.address.postal]
+country = "Canada"
+
+%%%
+
+.# Abstract
 
 Many systems produce significant volumes of metrics which may not be 
 all be needed at the same for consumption by collection/aggregation endpoints.
@@ -8,6 +33,8 @@ local nodes to cache the metric values. If  any values are later needed,
 a new subscription can fetch only the  value that are needed. This allows 
 for a "just in time" delivery of  metrics and reduces transfer of metrics that 
 may not be all needed.
+
+{mainmatter}
 
 # Introduction 
 
@@ -96,6 +123,55 @@ consists of series of points in time. At each point in time there can be several
 a name and value, an optional ```ValueType```.
 
 Below picture captures relationship between the entities in the data model.
+
+~~~~
+Metric
+   - Name
+   - Attributes
+   - Timeseries - array of values ordered by time 
+
+Device 
+    Metrics
+        cpu_usage
+                       [t2, .30], ..
+        cpu_temp
+            [t1, 100], [t2, 55], ...
+    Attributes
+        cluster = us-west
+        os = ubuntu 18
+
+
+OTel Record
+  time=t1 attributes=[cluster=us-west, os=u18] cpu_temp=100
+  time=t2 attributes=[cluster=us-west, os=u18] cpu_usage=0.3, cpu_temp=55
+  
+  
+Terminology
+
+Metric Name in Otel --> Mertic Name
+Attributes --> Attributes
+ValueType (Counter, Gauge, Histogram ..) --> None
+Value --> Value [ int/float]  
+unit --> None
+Resource --> Device { replace it to Resource }
+None --> ResourceId   (maps to MAC)
+
+MOQT Mapping
+
+Group = t1
+   O0 = time=t1, attribtes=[....]
+   O2 = cpu_temp = 55
+
+Group = t2
+   O0 = time=t2, attribtes=[....]
+   O1 = cpu_usage=0.3
+   O2 = cpu_temp = 55
+   
+   
+Group = t2  
+~~~~
+
+
 ~~~~~
                                           Attribute
                                         +-----------------+
@@ -168,7 +244,8 @@ model (as defined in section XXX).
        +------------------------+                      +------------------------+
        |    Object0 (Capture    |                      |    Object0 (Capture    |
        |      Timestamp in      |                      |      Timestamp in      |
-       |      Nanoseconds)      |                      |      Nanoseconds)      |
+       |      Nanoseconds,
+              Attributes)      |                      |      Nanoseconds)      |
        +------------------------+                      +------------------------+
        +------------------------+                      +------------------------+
        |  Object1 (Datapoint)   |                      |  Object1 (Datapoint)   |
@@ -200,7 +277,7 @@ in ObjectId 0.
 ## MOQT TrackNamespace and Track Name
 
 The Track Namespace ```moq://metrics.moq.arpa/metrics-v1/``` is used for metrics reported 
-over MOQT as defined in this specifiction.
+over MOQT as defined in this specification.
 
 Following TrackNames are defined per reporting end-point. Each end-point 
 is identified by its device Id as defined in XXX. 
@@ -220,3 +297,9 @@ granular and a detailed view of system being measured. Such metrics are
 captured at frequent intervals and when reported shall consume much 
 higher bandwidth than the summary metrics. 
 
+{backmatter}
+
+# Acknowledgments
+
+Thanks to TODO for contributions and suggestions to this
+specification.
