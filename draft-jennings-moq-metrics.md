@@ -183,12 +183,6 @@ model (as defined in section XXX).
        +------------------------+                      +------------------------+
 ~~~~       
 
-At each point in time, on object with just the timestamp is written to
-group 0. The object id is the time truncated to 62 bit integer. At the
-same time an object with all the attributes is written to group 1 with
-the same groupID. Each measurement is written to it's own object and the
-groupID is formed by the last 16 bits of the sha1 hash of the metric
-name.
 
 The MOQT GroupId identifies point in time when a given set of measurements
 were captured. GroupId, thus is by metrics capture time with number 
