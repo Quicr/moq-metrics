@@ -27,6 +27,67 @@ Each device that produces metrics publishes the metrics with MOQT. The
 time series are put in different tracks and individual objects contain
 the values at a given timestamp.
 
+# Idea
+
+~~~~
+
+                          .-------------.
+                       ,-'               '-.
+                      /      Analytics      \
+                     (         Node          )
+                        '-.             ,-'
+                           \-----------'
+                                 ^
+                 Pub Track:      | 
+              /device1/summary   |
+                                 |
+                             .-------. 
+                          ,-'         '-. 
+                         ;  Local Relay  :
+                         :    (Cache)    ;
+                           '-.       ,-'
+                              \-----'
+                                ^  ^
+             Pub Track:         |  |         Pub Track:
+          /device1/summary      |  |     /device1/detailed
+                             +--+  +-+
+                             |       |
+                   +-----------------+--------+
+                   |         Device1          |
+                   +--------------------------+
+
+~~~~
+
+~~~~
+                            .-------------.
+                        ,-'               '-.
+                       /      Analytics      \
+                      (         Node          )--+
+                         '-.             ,-'     |
+                            \-----------'        |
+                                  ^              |
+                                  |              |
+              Pub Track:          |              |         Sub Track:
+          /device1/detailed       |              |     /device1/detailed
+               from cache         |              |          {filter}
+                                  |              |
+                              .-------.          |
+                           ,-'         '-.       |
+                          ;  Local Relay  :      |
+                          :    (Cache)    ;<-----+
+                            '-.       ,-'
+                               \-----'
+                                 ^  ^
+              Pub Track:         |  |         Pub Track:
+           /device1/summary      |  |     /device1/detailed
+                              +--+  +-+
+                              |       |
+                    +-----------------+--------+
+                    |         Device1          |
+                    +--------------------------+
+
+~~~~
+
 # Metrics Data Model
 
 Each metric reported by an endpoint has one or more timeseries. A metric timeseries 
@@ -37,26 +98,26 @@ a name and value, an optional ```ValueType```.
 Below picture captures relationship between the entities in the data model.
 ~~~~~
                                           Attribute
-                                        +--------------------------+
-                                        | Key: String              |
-                             +--------->|                          |
-  Datapoint                  |          | Value: String            |
-+--------------------------+ |          +--------------------------+
+                                        +-----------------+
+                                        | Key: String     |
+                             +--------->|                 |
+  Datapoint                  |          | Value: String   |
++--------------------------+ |          +-----------------+
 |                          | |
 | Attributes[1..n]  -------+-+
 |                          |
 | Measurements[1..n]-------+-+           
 |                          | |          Measurement
-+--------------------------+ |          +--------------------------+
-                             |          | Name: String             |
-                             +--------->| Value: ValueType         |
-                                        |            |             |
-                                        +------------+-------------+
++--------------------------+ |          +------------------+
+                             |          | Name: String     |
+                             +--------->| Value: ValueType |
+                                        |            |     |
+                                        +------------+-----+
                                                      |
                                                      v
-                                       +------------------------+
-                                       | Oneof(Guage, Counter)  |
-                                       +------------------------+
+                                        +------------------------+
+                                        | Oneof(Guage, Counter)  |
+                                        +------------------------+
 ~~~~~
 
 Measurement names are represented as strings and may contain ASCII letters, digits, 
@@ -100,6 +161,27 @@ Jan 1972" using NTP Era zero conventions.
 This section maps the metrics data model defined in this specification to MOQT Object 
 model (as defined in section XXX).
 
+~~~~
++--------------------+                           +--------------------+
+| Group(Timestamp-1) |                           | Group(Timestamp-N) |
++--------------------+                           +--------------------+
+       +------------------------+                      +------------------------+
+       |    Object0 (Capture    |                      |    Object0 (Capture    |
+       |      Timestamp in      |                      |      Timestamp in      |
+       |      Nanoseconds)      |                      |      Nanoseconds)      |
+       +------------------------+                      +------------------------+
+       +------------------------+                      +------------------------+
+       |  Object1 (Datapoint)   |                      |  Object1 (Datapoint)   |
+       +------------------------+                      +------------------------+
+       +------------------------+                      +------------------------+
+       |  Object2 (Datapoint)   |                      |  Object2 (Datapoint)   |
+       +------------------------+                      +------------------------+
+                  *                                               *
+                  *                                               *
+       +------------------------+                      +------------------------+
+       |  ObjectN (Datapoint)   |                      |  ObjectN (Datapoint)   |
+       +------------------------+                      +------------------------+
+~~~~       
 
 At each point in time, on object with just the timestamp is written to
 group 0. The object id is the time truncated to 62 bit integer. At the
@@ -108,39 +190,39 @@ the same groupID. Each measurement is written to it's own object and the
 groupID is formed by the last 16 bits of the sha1 hash of the metric
 name.
 
-Each group is identified by metrics captture time as integer with number 
-of milliseconds since "1 Jan 1972" using NTP Era :zero conventions. 
+The MOQT GroupId identifies point in time when a given set of measurements
+were captured. GroupId, thus is by metrics capture time with number 
+of milliseconds since "1 Jan 1972" using NTP Era :zero conventions and 
+truncated to 62 bit integer.
 
-The first object with Id 0 encoded the timestamp of capturing the datapoint 
-in a time series and Object Id 1 identifies the attributes defined as 
-"key-value" pairs and individual  measurements themselves are captured 
-with the consecutive object Ids starting from ObjectId 2.
- 
-Below captures an example of mapping metrics :
+The first object, with ObjectId of 0, captures the Value is UNIX Epoch time in 
+nanoseconds since 00:00:00 UTC on 1 January 1970. This time represents the 
+time at which a given set of measurements are collected.
 
-# Naming
+The subsequent objects (ObjectId 1 and so on) capture individual DataPoints 
+corresponding to the measurements being collected at the time identified
+in ObjectId 0.
 
-The Namespace used is "moq://metrics.moq.arpa/metrics-v1/"
+## MOQT TrackNamespace and Track Name
 
-Following tracks are defined per reporting end-point. Each end-point 
+The Track Namespace ```moq://metrics.moq.arpa/metrics-v1/``` is used for metrics reported 
+over MOQT as defined in this specifiction.
+
+Following TrackNames are defined per reporting end-point. Each end-point 
 is identified by its device Id as defined in XXX. 
 
-## Metric Summary Reporting 
+### Metric Summary Reporting 
 
-The Track name defined as "<deviceID>/summary
+TrackName ```"<deviceID>/summary``` identifies metrics/measurements that are
+reported over a long interval and typically correspond to aggregated or summary
+view of things being measured. The Groups and Objects within the summary track 
+are less frequent and consume less bandwidth.
 
-## Detailed Metrics Reporting
 
-The Track name defined as "<deviceID>/detailed
- 
+### Detailed Metrics Reporting
 
-# Data Encoding
-
-### Group 0 
-
-TBD Binary Encoding of:
-
-### Group 1
-
-### Group N
+TrackName  ```<deviceID>/detailed``` identifies metrics that represent 
+granular and a detailed view of system being measured. Such metrics are
+captured at frequent intervals and when reported shall consume much 
+higher bandwidth than the summary metrics. 
 
