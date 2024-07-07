@@ -64,11 +64,11 @@ This document specifies how to send metrics type
 information over the Media Over QUIC Transport (MOQT).
 
 
-# Metrics Data Model
+# Metrics Data Model {#model}
 
 Below picture captures relationship between the entities in the data model.
 
-~~~~
+~~~ ascii-art
   +---------------------+
   |      Resource       |                  Attribute
   |       - ResourceID  |
@@ -88,8 +88,9 @@ Below picture captures relationship between the entities in the data model.
                                          +--------------------------+
 
 
-~~~~
+~~~
 
+TODO: Define ABNF.
 
 The devices or systems publishing the metrics are referred  to as "Resources" and have 
 unique "ResourceID".
@@ -110,7 +111,7 @@ Attributes are represented as key-value pairs and represented as strings.
 The data model specified in this section is consistent with the "OpenTelemetry
 Specification 1.34.0" [@?otel] for metrics when at rest (also known as 
 Timeseries model). See section (#moqt-mapping) for streaming model where
-MOQT is used transporting the metrics.
+MOQT is used for transporting the metric data.
 
 ## ResourceID
 
@@ -140,7 +141,7 @@ reporting metrics separately, and could pick the right metrics level in the subs
 The Track Namespace of ```moq://metrics.moq.arpa/metrics-v1/``` is defined in this 
 specification. The track name identifies the resource and the granularity level
 for the metrics being published. Thus, a track name can be identified with 
-```<resourceID>/<level>``` and the full track name having the following format
+```<resourceID>/<level>``` and the full track name having the following format:
 
 ~~~
 moq://metrics.moq.arpa/metrics-v1/<resourceID>/<level>
@@ -151,14 +152,14 @@ Following granularity levels are defined in this specification, along
 with their associated track names.
 
 
-1. Emergency     : <resourceID>/0
-2. Alert         : <resourceId>/1
-3. Critical      : <resourceId>/2
-4. Error         : <resourceId>/3
-5. Warning       : <resourceId>/4
-6. Notice        : <resourceId>/5
-7. Informational : <resourceId>/6
-8. Debug         : <resourceId>/7
+1. Emergency     : ```<resourceID>/0```
+2. Alert         : ```<resourceId>/1```
+3. Critical      : ```<resourceId>/2```
+4. Error         : ```<resourceId>/3```
+5. Warning       : ```<resourceId>/4```
+6. Notice        : ```<resourceId>/5```
+7. Informational : ```<resourceId>/6```
+8. Debug         : ```<resourceId>/7```
 
 Mapping of metrics and its frequency to the aforementioned levels by  a resource 
 are application defined. However, it can be typical of an implementation to 
@@ -177,18 +178,22 @@ and truncated to 62 bit integer. The first object, with MOQT object Id of 0,
 captures 2 pieces of information:
 
 1. The capture timestamp as UNIX Epoch time in nanoseconds since 00:00:00 UTC 
-on 1 January 1970,
-2. Attributes scoped to a given resource identified in the track name.
+on 1 January 1970.  
 
-The subsequent objects (ObjectId 1 and so on) capture various metrics and
-their values captured by the resource at the time identified in the object
-with object ID of 0.
+2. One or more attributes scoped to a given resource identified in the track name.
+This field is optional and if omitted, the attribute values correspond to most 
+recent object 0 that had any attribute values.
 
-Below is a conceptual representation of the mapping for the metrics 
-streaming model to the MOQT object model, for resource with 
+The subsequent objects (ObjectId 1 and so on) each capture metric name and the
+corresponding value at the time identified in the object with object ID of 0.
+The metric name field is optional and if omitted, the metric name from the
+object with same object ID seen in the most recent group is considered.
+
+Below is a conceptual representation of the mapping for the metrics
+streaming model to the MOQT object model, for resource with
 resourceID of "resource-1" and granularity level of "warning (4)".
 
-~~~~
+~~~ ascii-art
 TrackName: resource-1/4
   +--------------------+                   +--------------------+
   | Group(Timestamp-1) |                   | Group(Timestamp-N) |
@@ -206,19 +211,40 @@ TrackName: resource-1/4
     +------------------------+              +------------------------+
     |         Object2        |              |         Object2        |
     |  (Metric Name = Value) |   * * *      |  (Metric Name = Value) |
-    +------------------------+              +------------------------+
-	           *                                        *
-	           *                                        *
-               * 	                                    *
-   +------------------------+              +------------------------+
-   |        ObjectN         |              |        ObjectN         |
-   | (Metric Name = Value)  |              | (Metric Name = Value)  |
-   +------------------------+              +------------------------+
+    +------------------------+              +------------------------+                                    
+               *                                        *	  
+               *                                        *
+   +------------------------+               +------------------------+
+   |        ObjectN         |               |        ObjectN         |
+   | (Metric Name = Value)  |               | (Metric Name = Value)  |
+   +------------------------+               +------------------------+
 
-~~~~       
+~~~
+
+## Examples
+
+Here is an example of Object ID 0 data when represented in JSON format [@?RFC8259].
+```
+{
+  "capture_timestamp": 1720367991,
+  "attributes": [ { "location": "us-east-2"}, {"os": "ubuntu20.4" }]
+}
+```
+   
+
+Here is an example of Object ID 1 data showing cpu_usage and cpu_temperature metric 
+values represented in JSON format [@?RFC8259].
+
+```
+{
+  "cpu_usage_percent": 99.1,
+  "cpu_temperature": 45.1
+}
+```
 
 
-
+See (#model) for details on data types representations for capture
+timestamp, attributes, metric names and values.
 
 {backmatter}
 
@@ -229,7 +255,7 @@ specification.
 
 <reference anchor='otel' target='https://opentelemetry.io/docs/specs/otel/metrics/data-model/'>
     <front>
-        <title>OpenTelemetry Metrics Data Model</title>
+        <title/>
         <author/>
         <date year=""/>
     </front>
