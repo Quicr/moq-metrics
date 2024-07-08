@@ -1,7 +1,49 @@
----
-normative:
-MOQT: draft-ietf-moq-transport-03
----
+%%%
+title = "Metrics over MOQT"
+abbrev = "moqt-metrics"
+ipr= "trust200902"
+area = "art"
+workgroup = ""
+keyword = ["metrics","moq"]
+
+[seriesInfo]
+status = "informational"
+name = "Internet-Draft"
+value = "draft-jennings-moq-metrics"
+stream = "IETF"
+
+[[author]]
+initials="C."
+surname="Jennings"
+fullname="Cullen Jennings"
+organization = "Cisco"
+[author.address]
+email = "fluffy@iii.ca"
+[author.address.postal]
+country = "Canada"
+
+[[author]]
+initials="TE"
+surname="Evens"
+fullname="Tim Evens"
+organization = "Cisco"
+[author.address]
+email = "tim@evensweb.com"
+[author.address.postal]
+country = "USA"
+
+[[author]]
+initials="S."
+surname="Nandakumar"
+fullname="Suhas Nandakumar"
+organization = "Cisco"
+[author.address]
+email = "snandaku@cisco.com"
+[author.address.postal]
+country = "USA"
+
+
+%%%
 
 # Abstract
 
