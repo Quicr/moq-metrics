@@ -22,6 +22,17 @@ email = "fluffy@iii.ca"
 [author.address.postal]
 country = "Canada"
 
+[[author]]
+initials="S."
+surname="Nandakumar"
+fullname="Suhas Nandakumar"
+organization = "Cisco"
+[author.address]
+email = "snandaku@cisco.com"
+[author.address.postal]
+country = "USA"
+
+
 %%%
 
 .# Abstract
@@ -35,6 +46,9 @@ Media Over QUIC Transport (MOQT) [@!I-D.ietf-moq-transport],
 allows metrics data to be prioritized within the congestion context of the 
 primary application as well as enabling local 
 nodes to cache the metric value to be later retrieved via new subscriptions. 
+
+This document specifies how to send metrics type
+information over the Media Over QUIC Transport (MOQT).
 
 {mainmatter}
 
@@ -92,7 +106,7 @@ Below picture captures relationship between the entities in the data model.
 
 TODO: Define ABNF.
 
-The devices or systems publishing the metrics are referred  to as "Resources" and have 
+The devices or systems publishing the metrics are referred  to as "Resources" and have an 
 unique "ResourceID".
 
 Each metric reported by an ```Resource``` has an associated ```timeseries```. A metric's timeseries
@@ -125,11 +139,6 @@ address is that many other management systems use this address and it
 makes it easier to correlate. The disadvantage is that it reveals the
 MAC address.
 
-## Time
-
-Time is represented by an integer with number of microseconds since "1
-Jan 1972" using NTP Era zero conventions.
-
 
 # Metrics and MOQT {#moqt-mapping}
 
@@ -141,7 +150,7 @@ reporting metrics separately, and could pick the right metrics level in the subs
 The Track Namespace of ```moq://metrics.moq.arpa/metrics-v1/``` is defined in this 
 specification. The track name identifies the resource and the granularity level
 for the metrics being published. Thus, a track name can be identified with 
-```<resourceID>/<level>``` and the full track name having the following format:
+```<resourceID>/<granularity-level>``` and the full track name having the following format:
 
 ~~~
 moq://metrics.moq.arpa/metrics-v1/<resourceID>/<level>
@@ -161,8 +170,8 @@ with their associated track names.
 7. Informational : ```<resourceId>/6```
 8. Debug         : ```<resourceId>/7```
 
-Mapping of metrics and its frequency to the aforementioned levels by  a resource 
-are application defined. However, it can be typical of an implementation to 
+Mapping of metrics and its reporting frequency at the aforementioned levels by 
+a resource is application defined. However, it can be typical of an implementation to 
 report metrics that represent aggregation of values over larger time intervals 
 or that represent erroneous conditions, to use granularity that is one of 
 Emergency, Alert, Critical and Error. Such metrics have characteristics of 
@@ -174,27 +183,28 @@ however,  consumes  high bandwidth when published.
 The MOQT group ID identifies point in time when a given set of metrics
 were captured by the resource. Group ID, thus represents capture 
 time as number of milliseconds since "1 Jan 1972" using NTP Era zero conventions 
-and truncated to 62 bit integer. The first object, with MOQT object Id of 0, 
+and truncated to 62 bit integer. The first object, with MOQT object ID of 0
 captures 2 pieces of information:
 
 1. The capture timestamp as UNIX Epoch time in nanoseconds since 00:00:00 UTC 
 on 1 January 1970.  
 
-2. One or more attributes scoped to a given resource identified in the track name.
-This field is optional and if omitted, the attribute values correspond to most 
+2. One or more attributes scoped to a given resource specified in the track name.
+This field is optional and if omitted, the attribute values correspond to the most 
 recent object 0 that had any attribute values.
 
-The subsequent objects (ObjectId 1 and so on) each capture metric name and the
-corresponding value at the time identified in the object with object ID of 0.
+The subsequent objects (Object ID 1 and so on) each capture a metric name and the
+corresponding value observed at the time provided in the object with the object ID of 0.
 The metric name field is optional and if omitted, the metric name from the
 object with same object ID seen in the most recent group is considered.
 
-Below is a conceptual representation of the mapping for the metrics
-streaming model to the MOQT object model, for resource with
-resourceID of "resource-1" and granularity level of "warning (4)".
+Below is a conceptual representation of the MOQT mapping for a resource whose
+resourceID is "resource-1" and granularity level of "warning (4)".
 
 ~~~ ascii-art
+
 TrackName: resource-1/4
+
   +--------------------+                   +--------------------+
   | Group(Timestamp-1) |                   | Group(Timestamp-N) |
   +--------------------+                   +--------------------+
@@ -225,6 +235,7 @@ TrackName: resource-1/4
 
 Here is an example of Object ID 0 data when represented in JSON format [@?RFC8259].
 ```
+Group 1, Object ID 0
 {
   "capture_timestamp": 1720367991,
   "attributes": [ { "location": "us-east-2"}, {"os": "ubuntu20.4" }]
@@ -232,16 +243,43 @@ Here is an example of Object ID 0 data when represented in JSON format [@?RFC825
 ```
    
 
-Here is an example of Object ID 1 data showing cpu_usage and cpu_temperature metric 
+Here is an example of Object ID 1 and 2 data showing cpu_usage_percent and cpu_temperature metric 
 values represented in JSON format [@?RFC8259].
 
 ```
+Group 1, Object ID 1
 {
-  "cpu_usage_percent": 99.1,
-  "cpu_temperature": 45.1
+  "metric_name": "cpu_usage_percentage",
+  value: 99
+}
+
+Group 1,  Object ID 2
+{
+  "metric_name": "cpu_temperature",
+  "value": 45.1
 }
 ```
 
+Below is another example that shows Group 2 data as continuation from the previous examples,
+where the redundant information is omitted.
+
+```
+
+Group 2, Object ID 0
+{
+  "capture_timestamp": 1720369102,
+}
+
+Group 2, Object ID 1
+{
+  "value": 78
+}
+
+Group 2, Object ID 2
+{
+  "value": 21,
+}
+```
 
 See (#model) for details on data types representations for capture
 timestamp, attributes, metric names and values.
