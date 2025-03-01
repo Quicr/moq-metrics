@@ -146,7 +146,8 @@ model (as defined in section 2 of [@!I-D.ietf-moq-transport]).  The core idea is
 for the MOQT objects are setup such that a subscriber could subscribe to each resource 
 reporting metrics separately, and could pick the right metrics level in the subscriptions.
 
-The Track Namespace consisting of following tuples (represented as string) ```(moq://), (metrics.moq.arpa/)(metrics-v1/),(resourceID)``` is defined in this 
+The Track Namespace consisting of following tuples 
+```(moq://metrics.moq.arpa/v1/),(resourceID)``` is defined in this 
 specification. The track name identifies the granularity level
 for the metrics being published by the resourcce. Thus, a track name can be 
 identified with the tuple ```(<granularity-level>)``` and the full track name 
