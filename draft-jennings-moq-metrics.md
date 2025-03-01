@@ -39,7 +39,7 @@ country = "USA"
 
 Many systems produce significant volumes of metrics which either are 
 not all needed at the same time for consumption by collection/aggregation
-endpoints or will compete for bandwidth with the primary application, thus 
+endpoints or may also compete for bandwidth with the primary application, thus 
 exacerbating congestion conditions especially in low-bandwidth networks. 
 Delivering these over architectures enabled by publish/subscribe transport like 
 Media Over QUIC Transport (MOQT) [@!I-D.ietf-moq-transport], 
@@ -68,11 +68,10 @@ the peak rate while not impacting the peak rate available for media.
 Publishing metrics over architectures enabled via MOQT provides
 additional benefits of leveraging MOQT Relays as caches to store
 metrics in local nodes. This allows limiting the volume of
-data to sent to the metrics collectors or aggregators, all at the
-same time. Instead, metrics that are frequently collected and reported
-can be cached in local nodes and a new subscription can fetch only
-the metrics that are needed. This allows for a "just in time" delivery 
-of metrics.
+data to sent to the metrics collectors or aggregator. Instead, metrics that 
+are frequently collected and reported can be cached in local nodes and a 
+new subscription can fetch only the metrics that are needed. This allows for a 
+"just in time" delivery of metrics.
 
 This document specifies how to send metrics type 
 information over the Media Over QUIC Transport (MOQT).
@@ -147,10 +146,11 @@ model (as defined in section 2 of [@!I-D.ietf-moq-transport]).  The core idea is
 for the MOQT objects are setup such that a subscriber could subscribe to each resource 
 reporting metrics separately, and could pick the right metrics level in the subscriptions.
 
-The Track Namespace of ```moq://metrics.moq.arpa/metrics-v1/``` is defined in this 
-specification. The track name identifies the resource and the granularity level
-for the metrics being published. Thus, a track name can be identified with 
-```<resourceID>/<granularity-level>``` and the full track name having the following format:
+The Track Namespace consisting of following tuples (represented as string) ```(moq://), (metrics.moq.arpa/)(metrics-v1/),(resourceID)``` is defined in this 
+specification. The track name identifies the granularity level
+for the metrics being published by the resourcce. Thus, a track name can be 
+identified with the tuple ```(<granularity-level>)``` and the full track name 
+having the following format (when represented as a string):
 
 ~~~
 moq://metrics.moq.arpa/metrics-v1/<resourceID>/<level>
@@ -161,14 +161,14 @@ Following granularity levels are defined in this specification, along
 with their associated track names.
 
 
-1. Emergency     : ```<resourceID>/0```
-2. Alert         : ```<resourceId>/1```
-3. Critical      : ```<resourceId>/2```
-4. Error         : ```<resourceId>/3```
-5. Warning       : ```<resourceId>/4```
-6. Notice        : ```<resourceId>/5```
-7. Informational : ```<resourceId>/6```
-8. Debug         : ```<resourceId>/7```
+1. Emergency     : ```0```
+2. Alert         : ```1```
+3. Critical      : ```2```
+4. Error         : ```3```
+5. Warning       : ```4```
+6. Notice        : ```5```
+7. Informational : ```6```
+8. Debug         : ```7```
 
 Mapping of metrics and its reporting frequency at the aforementioned levels by 
 a resource is application defined. However, it can be typical of an implementation to 
@@ -178,7 +178,7 @@ Emergency, Alert, Critical and Error. Such metrics have characteristics of
 being less frequent and hence consume lesser bandwidth. Metrics that are 
 captured more frequently and capture detailed view of system being measured 
 typically are reported at granularity level of Warning and above. Such metrics, 
-however,  consumes  high bandwidth when published.
+however, consumes  high bandwidth when published.
 
 The MOQT group ID identifies point in time when a given set of metrics
 were captured by the resource. Group ID, thus represents capture 
@@ -267,17 +267,17 @@ where the redundant information is omitted.
 
 Group 2, Object ID 0
 {
-  "capture_timestamp": 1720369102,
+  "capture_timestamp": 1720369102, // attributes are not repeated
 }
 
 Group 2, Object ID 1
 {
-  "value": 78
+  "value": 78 // metric_name corresponds to cpu_usage_percentage
 }
 
 Group 2, Object ID 2
 {
-  "value": 21,
+  "value": 21, // metric_name correspons to cpu_temperature
 }
 ```
 
