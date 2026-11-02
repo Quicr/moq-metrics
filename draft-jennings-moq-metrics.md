@@ -290,28 +290,53 @@ however, consume high bandwidth when published.
 
 ## Catalog Track {#catalog}
 
-The catalog track describes the resource and the metrics it publishes. It
-carries:
+The catalog track describes the resource and the metrics it publishes.
+Each group contains a single object (Object ID 0) carrying the complete
+catalog as a JSON {{!RFC8259}} object with the following fields. Parsers
+MUST ignore fields they do not understand.
 
-1. The resource attributes.
+| Field        | Type   | Req. | Description                                  |
+|:-------------|:-------|:----:|:---------------------------------------------|
+| `version`    | String | Yes  | Catalog format version, `"1"`                |
+| `attributes` | Object | No   | Resource attributes as string key-value pairs |
+| `tracks`     | Object | Yes  | Maps each data track name to an array of metric objects |
+{: title="Catalog fields"}
 
-2. For each data track, the list of metrics, where each metric has a
-   Metric Index, name, value type (Gauge or Counter), and numeric
-   representation (integer or floating point).
+| Field      | Type   | Req. | Description                                  |
+|:-----------|:-------|:----:|:---------------------------------------------|
+| `index`    | Number | Yes  | Metric Index, 1 or greater; the Object ID of the metric in data groups |
+| `name`     | String | Yes  | Metric name                                  |
+| `type`     | String | Yes  | `"gauge"` or `"counter"`                     |
+| `repr`     | String | Yes  | `"int"` or `"float"`                         |
+| `unit`     | String | No   | Unit of the value, following {{OTEL}} conventions |
+| `subgroup` | Number | No   | Subgroup ID carrying the metric; default 0   |
+{: title="Metric object fields"}
 
-Each group in the catalog track contains a single object (Object ID 0)
-carrying the complete current catalog. When the attributes or the set of
-metrics change, the publisher publishes a new group with a larger Group
-ID. A subscriber obtains the current catalog by subscribing to the catalog
-track with FILL_PARAMETERS selecting the current group
-({{Section 3.5 of MOQT}}).
+The Group ID of a catalog group is the time, in milliseconds since the
+UNIX Epoch, from which that catalog applies. A data group with Group ID T
+is interpreted using the catalog group with the largest Group ID not
+greater than T. The publisher MUST publish a new catalog group before
+publishing any data object that depends on it, such as a new Metric Index
+or changed attributes. A subscriber that receives a data object with an
+unknown Metric Index SHOULD obtain the latest catalog and MAY discard the
+object.
 
 A Metric Index, once assigned to a metric within a data track, MUST NOT be
-reassigned to a different metric for the lifetime of that track. New
-metrics are assigned new indices and metrics that are no longer reported
-are simply no longer published. Thus the most recent catalog can be used to
-interpret any group of a data track, including groups retrieved from relay
-caches via FETCH. Metric Index 0 is reserved.
+reassigned to a different metric for the lifetime of that track. Metrics
+that are no longer reported are simply no longer published.
+
+A subscriber obtains the current catalog by subscribing to the catalog
+track with FILL_PARAMETERS selecting the current group
+({{Section 3.5 of MOQT}}). The catalog track MUST use subgroup delivery
+and SHOULD carry the following Track Properties:
+
+* MAX_CACHE_DURATION no shorter than that of any data track of the
+  resource, so that cached data remains interpretable.
+
+* DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
+  track of the resource.
+
+* No OBJECT_DELIVERY_TIMEOUT.
 
 ## Groups and Objects {#groups}
 
@@ -497,16 +522,16 @@ The following examples represent object payloads in JSON format {{?RFC8259}}.
 Here is an example of the catalog object for a resource.
 
 ```
-Catalog Track, Group 1, Object ID 0
+Catalog Track, Group 1720367990000, Object ID 0
 {
-  "attributes": [ { "location": "us-east-2" },
-                  { "os": "ubuntu20.4" } ],
+  "version": "1",
+  "attributes": { "location": "us-east-2", "os": "ubuntu20.4" },
   "tracks": {
     "4": [
       { "index": 1, "name": "cpu_usage_percentage",
-        "type": "gauge", "repr": "int" },
+        "type": "gauge", "repr": "int", "unit": "%" },
       { "index": 2, "name": "cpu_temperature",
-        "type": "gauge", "repr": "float" }
+        "type": "gauge", "repr": "float", "unit": "Cel" }
     ]
   }
 }
@@ -551,6 +576,25 @@ Track 4, Group 1720367992000, Object ID 2
 See {{model}} for details on data types representations for capture
 timestamp, attributes, metric names and values.
 
+# Use with MSF {#msf}
+
+An MOQT Streaming Format (MSF) {{?MSF=I-D.ietf-moq-msf}} catalog can
+direct a client to publish metrics using a `publishTracks` entry with a
+`packaging` of `"moqmetrics"` and a `role` of `"metrics"`. In such an
+entry:
+
+* `namespace` is the Track Namespace of {{naming}} rendered using
+  {{Section 8.8 of MOQT}}, with `%resourceId%` as a placeholder for the
+  client's ResourceID: `metrics.2emoq.2earpa-v1-%resourceId%`.
+
+* `name` is the data track for a granularity level ({{levels}}). A
+  catalog can include one entry per level it wants the client to
+  publish.
+
+A client publishing any data track in this way also publishes the
+catalog track ({{catalog}}) in the same namespace. The `connectionUri`
+and `token` of the entry apply to the catalog track as well.
+
 # IANA Considerations {#iana}
 
 This document has no IANA actions.
@@ -584,6 +628,8 @@ security considerations of {{MOQT}} apply.
   Properties for priority, group order, caching and delivery timeouts,
   SUBSCRIBE_NAMESPACE for discovery, range filters for metric selection,
   and FETCH and fill for time range retrieval.
+
+* Specified the catalog format and added use with MSF.
 
 * Added an Architecture Overview describing metrics sharing a session
   with media, and metrics as the primary data.
