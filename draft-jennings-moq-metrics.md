@@ -353,10 +353,11 @@ Metric Description {
 Receivers MUST ignore any bytes following the fields defined in this
 document, to allow future extension.
 
-The Group ID of a catalog group is the time, in milliseconds since the
-UNIX Epoch, from which that catalog version applies. Each data group
-identifies the catalog version it uses (see {{groups}}). The publisher
-MUST publish a catalog group before any data group that refers to it.
+The Group ID of a catalog group is the catalog version number. The first
+version has Group ID 1, and each new version increments it by one, so the
+reference carried in every data group (see {{groups}}) stays small. The
+publisher MUST publish a catalog group before any data group that refers
+to it.
 
 Metric Indices are scoped to a catalog version: a new catalog version MAY
 assign indices differently. Publishers SHOULD keep indices stable across
@@ -373,7 +374,7 @@ A subscriber SHOULD subscribe to the catalog track in parallel with the
 data tracks, using FILL_PARAMETERS selecting the current group
 ({{Section 3.5 of MOQT}}), and hold data objects until the referenced
 catalog objects are received. Catalog versions rarely change, so
-subscribers MAY cache them per Track Namespace and catalog Group ID and
+subscribers MAY cache them per Track Namespace and catalog version and
 use a cached version without waiting. A subscriber that receives a data
 group referring to a catalog version it does not have retrieves it with
 FETCH.
@@ -412,7 +413,7 @@ within a group are:
 ~~~
 Capture Info {
   Capture Timestamp Offset (vi64),
-  Catalog Group ID (vi64),
+  Catalog Version (vi64),
 }
 ~~~
 {: title="Capture Info (Object ID 0)"}
@@ -421,8 +422,10 @@ Capture Info {
   milliseconds, to obtain the precise capture time. The value is less
   than 1000000.
 
-* Catalog Group ID: The Group ID of the catalog version used by this
-  group.
+* Catalog Version: The Group ID of the catalog version used by this
+  group. A subscriber that does not have this version holds the group
+  and retrieves the version, so that it never interprets values with a
+  stale catalog.
 
 The Metric Value is the entire object payload, encoded according to the
 Value Representation of the metric:
@@ -490,8 +493,8 @@ across groups, so that subscribers can select them using a Subgroup ID
 range filter. Since every metric object is independent of the others in
 its group, loss of a subgroup does not prevent use of the others; objects
 in subgroups other than the one carrying Object ID 0 use the Group ID as
-their capture time, and the latest catalog version not later than the
-Group ID.
+their capture time. They depend on Object ID 0 for the catalog version
+and are held until it is received.
 
 For levels where losing a sample is preferable to delaying it, such as
 Debug, publishers MAY send objects using the Datagram delivery mode.
@@ -604,11 +607,11 @@ The following examples show decoded object payloads.
 | 0      | Catalog Header     | Version 1; location = us-east-2, os = ubuntu20.4 |
 | 1      | Metric Description | cpu_usage_percentage; Gauge; unsigned; unit % |
 | 2      | Metric Description | cpu_temperature; Gauge; floating point; unit Cel |
-{: title="Catalog track, Group 1720367990000"}
+{: title="Catalog track, Group 1"}
 
 | Object | Structure    | Content                                     |
 |:------:|:-------------|:--------------------------------------------|
-| 0      | Capture Info | Offset 123456 ns; Catalog Group ID 1720367990000 |
+| 0      | Capture Info | Offset 123456 ns; Catalog Version 1 |
 | 1      | Metric Value | 99 (cpu_usage_percentage)                   |
 | 2      | Metric Value | 45.1 (cpu_temperature)                      |
 {: title="Warning track, Group 1720367991000"}
@@ -619,15 +622,15 @@ will never exist.
 
 | Object | Structure    | Content                                   |
 |:------:|:-------------|:------------------------------------------|
-| 0      | Capture Info | Offset 4211 ns; Catalog Group ID 1720367990000 |
+| 0      | Capture Info | Offset 4211 ns; Catalog Version 1 |
 | 2      | Metric Value | 44.8 (cpu_temperature)                    |
 {: title="Warning track, Group 1720367992000"}
 
-The Capture Info of Group 1720367991000 is encoded in 9 bytes:
+The Capture Info of Group 1720367991000 is encoded in 4 bytes:
 
 ~~~
-c1 e2 40                  Capture Timestamp Offset = 123456 (vi64)
-f9 90 8d ec 44 f0         Catalog Group ID = 1720367990000 (vi64)
+c1 e2 40   Capture Timestamp Offset = 123456 (vi64)
+01         Catalog Version = 1 (vi64)
 ~~~
 
 # Use with MSF {#msf}
