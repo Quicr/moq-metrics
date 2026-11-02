@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Metrics over MOQT</title>
+<meta content="Cullen Jennings" name="author">
+<meta content="Suhas Nandakumar" name="author">
+<meta content="
+       Many systems produce significant volumes of metrics which either are
+not all needed at the same time for consumption by collection/aggregation
+endpoints or may also compete for bandwidth with the primary application, thus
+exacerbating congestion conditions especially in low-bandwidth networks.
+Delivering these over architectures enabled by publish/subscribe transport like
+Media over QUIC Transport (MOQT)  ,
+allows metrics data to be prioritized within the congestion context of the
+primary application as well as enabling local
+nodes to cache the metric value to be later retrieved via new subscriptions. 
+       This document specifies how to send metrics type
+information over MOQT. 
+    " name="description">
+<meta content="xml2rfc 3.34.1" name="generator">
+<meta content="metrics" name="keyword">
+<meta content="moq" name="keyword">
+<meta content="draft-jennings-moq-metrics-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.34.1
+    Python 3.14.8
+    ConfigArgParse 1.8.0
+    google-i18n-address 3.1.1
+    intervaltree 3.2.1
+    Jinja2 3.1.6
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.13.4
+    pycountry 24.6.1
+    PyYAML 6.0.3
+    requests 2.33.1
+    wcwidth 0.9.2
+-->
+<link href="draft-jennings-moq-metrics.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
+}
+svg {
+  display: block;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
+}
+.alignCenter {
+  margin: 1em 0;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+      float: none;
+    }
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a {
+  text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
+}
+.iref + a[href].internal {
+  color: var(--text-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
+  }
+  @media print {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+  & .prepared {
+    float: right;
+  }
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
+  }
+}
+
+/* Comments */
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
+      }
+    }
+    & a.toplink {
+      float: right;
+    }
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
+    }
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc {
+    page-break-before: always;
+    border-top: none;
+    padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">moqt-metrics</td>
+<td class="right">November 2026</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Jennings &amp; Nandakumar</td>
+<td class="center">Expires 6 May 2027</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Network Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-jennings-moq-metrics-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2026-11-02" class="published">2 November 2026</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2027-05-06">6 May 2027</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">C. Jennings</div>
+<div class="org">Cisco</div>
+</div>
+<div class="author">
+      <div class="author-name">S. Nandakumar</div>
+<div class="org">Cisco</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Metrics over MOQT</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">Many systems produce significant volumes of metrics which either are
+not all needed at the same time for consumption by collection/aggregation
+endpoints or may also compete for bandwidth with the primary application, thus
+exacerbating congestion conditions especially in low-bandwidth networks.
+Delivering these over architectures enabled by publish/subscribe transport like
+Media over QUIC Transport (MOQT) <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>,
+allows metrics data to be prioritized within the congestion context of the
+primary application as well as enabling local
+nodes to cache the metric value to be later retrieved via new subscriptions.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">This document specifies how to send metrics type
+information over MOQT.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 6 May 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2026 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-architecture-overview" class="internal xref">Architecture Overview</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-metrics-sharing-a-session-w" class="internal xref">Metrics Sharing a Session with Media</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-metrics-as-the-primary-data" class="internal xref">Metrics as the Primary Data</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-metrics-data-model" class="internal xref">Metrics Data Model</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-resourceid" class="internal xref">ResourceID</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-metrics-and-moqt" class="internal xref">Metrics and MOQT</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-track-naming" class="internal xref">Track Naming</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-granularity-levels" class="internal xref">Granularity Levels</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-catalog-track" class="internal xref">Catalog Track</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-groups-and-objects" class="internal xref">Groups and Objects</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="auto internal xref">5.5</a>.  <a href="#name-track-properties" class="internal xref">Track Properties</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.6">
+                <p id="section-toc.1-1.5.2.6.1"><a href="#section-5.6" class="auto internal xref">5.6</a>.  <a href="#name-priorities" class="internal xref">Priorities</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.7">
+                <p id="section-toc.1-1.5.2.7.1"><a href="#section-5.7" class="auto internal xref">5.7</a>.  <a href="#name-discovery-and-subscription" class="internal xref">Discovery and Subscription</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.8">
+                <p id="section-toc.1-1.5.2.8.1"><a href="#section-5.8" class="auto internal xref">5.8</a>.  <a href="#name-filtering" class="internal xref">Filtering</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.9">
+                <p id="section-toc.1-1.5.2.9.1"><a href="#section-5.9" class="auto internal xref">5.9</a>.  <a href="#name-retrieval-of-past-metrics" class="internal xref">Retrieval of Past Metrics</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.10">
+                <p id="section-toc.1-1.5.2.10.1"><a href="#section-5.10" class="auto internal xref">5.10</a>. <a href="#name-examples" class="internal xref">Examples</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.10.2.1">
+                    <p id="section-toc.1-1.5.2.10.2.1.1"><a href="#section-5.10.1" class="auto internal xref">5.10.1</a>.  <a href="#name-catalog" class="internal xref">Catalog</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.10.2.2">
+                    <p id="section-toc.1-1.5.2.10.2.2.1"><a href="#section-5.10.2" class="auto internal xref">5.10.2</a>.  <a href="#name-data" class="internal xref">Data</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.10.2.3">
+                    <p id="section-toc.1-1.5.2.10.2.3.1"><a href="#section-5.10.3" class="auto internal xref">5.10.3</a>.  <a href="#name-result" class="internal xref">Result</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-use-with-msf" class="internal xref">Use with MSF</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-changes-from-the-ietf122-ve" class="internal xref">Changes from the ietf122 Version</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Systems often share the network bandwidth used for metrics with
+realtime media, which impacts the media quality. Metrics compete with
+media for bandwidth, reducing the peak bandwidth available to the primary
+application and often causing congestion in low-bandwidth networks.
+There is a desire to transport metrics at an appropriate priority level
+over the same transport as the application media. This allows metrics to
+take advantage of times when the media bitrate is below the peak rate,
+without impacting the peak rate available for media.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Publishing metrics over MOQT also allows MOQT relays to act as caches
+that store metrics close to where they are produced. Instead of sending
+every metric to collectors, metrics can be cached in relays and retrieved
+only when needed, enabling "just in time" delivery of metrics
+(see <a href="#retrieval" class="auto internal xref">Section 5.9</a>).<a href="#section-1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="arch">
+<section id="section-3">
+      <h2 id="name-architecture-overview">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-architecture-overview" class="section-name selfRef">Architecture Overview</a>
+      </h2>
+<p id="section-3-1">This section describes two deployment models for metrics over MOQT. In
+both, resources publish metrics as MOQT tracks (see <a href="#moqt-mapping" class="auto internal xref">Section 5</a>) to a
+relay, and metrics collectors subscribe to them via relays. Relays cache
+metrics so that collectors can retrieve them later.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<div id="arch-shared">
+<section id="section-3.1">
+        <h3 id="name-metrics-sharing-a-session-w">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-metrics-sharing-a-session-w" class="section-name selfRef">Metrics Sharing a Session with Media</a>
+        </h3>
+<p id="section-3.1-1">In this model, an endpoint such as a realtime conferencing client
+publishes its media and its metrics over the same MOQT session, and thus
+the same QUIC connection, to its ingress relay. Media and metrics share
+the congestion control context of that connection, and MOQT priorities
+(see <a href="#priorities" class="auto internal xref">Section 5.6</a>) determine what is sent when the available bandwidth
+is limited.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2">At the relay, media and metrics are forwarded to different destinations:
+media to the other participants, and metrics to a metrics collector,
+possibly through other relays. The relay does not need to treat the two
+differently beyond the track names and properties.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-3.1-3">
+<pre>
+                  one QUIC connection
+              (shared congestion control)
++------------+                   +---------+  media  +--------------+
+|  Endpoint  |      media        |         |--------&gt;| Participants |
+| +--------+ |==================&gt;|         |         +--------------+
+| | Media  | |                   |  Relay  |
+| +--------+ |      metrics      |         | metrics +--------------+
+| |Metrics | |==================&gt;| (cache) |--------&gt;|   Metrics    |
+| +--------+ |   (pri 128..240)  |         |         |  Collector   |
++------------+                   +---------+         +--------------+
+</pre><a href="#section-3.1-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3.1-4">When congestion occurs on the endpoint's connection, objects of the
+higher granularity metrics levels are the first to be delayed and, with
+OBJECT_DELIVERY_TIMEOUT, dropped, while media is unaffected. The relay
+continues to cache what it has received, and a collector can retrieve
+the metrics for a time window of interest later using FETCH
+(see <a href="#retrieval" class="auto internal xref">Section 5.9</a>).<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="arch-dedicated">
+<section id="section-3.2">
+        <h3 id="name-metrics-as-the-primary-data">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-metrics-as-the-primary-data" class="section-name selfRef">Metrics as the Primary Data</a>
+        </h3>
+<p id="section-3.2-1">In this model, the endpoints, such as servers, network devices or sensors,
+send metrics as their main data over MOQT. Each endpoint publishes its
+metrics tracks to a relay, which may aggregate many endpoints, and one or
+more metrics collectors subscribe to them.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-3.2-2">
+<pre>
++------------+
+| Endpoint 1 |--metrics--+
++------------+           |
+                         v
++------------+      +---------+       +---------+     +-----------+
+| Endpoint 2 |-----&gt;|  Relay  |------&gt;|  Relay  |----&gt;|  Metrics  |
++------------+      | (cache) |       | (cache) |     | Collector |
+                    +---------+       +---------+     +-----------+
++------------+           ^                 |
+| Endpoint N |--metrics--+                 |          +-----------+
++------------+                             +---------&gt;| Dashboard |
+                                                      +-----------+
+</pre><a href="#section-3.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2-3">Collectors discover endpoints and subscribe to the levels of interest
+(see <a href="#discovery" class="auto internal xref">Section 5.7</a>), while the remaining levels stay in relay caches until
+needed (see <a href="#retrieval" class="auto internal xref">Section 5.9</a>). Multiple consumers, such as a collector and a
+dashboard, can subscribe to the same tracks through relays without the
+endpoint sending the data more than once.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="model">
+<section id="section-4">
+      <h2 id="name-metrics-data-model">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-metrics-data-model" class="section-name selfRef">Metrics Data Model</a>
+      </h2>
+<p id="section-4-1">Below picture captures relationship between the entities in the data model.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-4-2">
+<pre>
++---------------------+
+|      Resource       |                  Attribute
+|       - ResourceID  |
++---------------------+                 +--------------------+
+   |                                    |    Key: String     |
+   |                              +----&gt;|   Value: String    |
+   |                              |     +--------------------+
+   |    +------------------+      |
+   +---&gt;|Attributes [0..n] | -----+
+   |    +------------------+             +--------------------+
+   |                              +-----&gt;|Metric Name: String |
+   |                              |      +--------------------+
+   |    +------------------+      |
+   +--&gt; |      Metric      |------+    +--------------------------+
+        +------------------+      |    |      TimeSeries 1..n     |
+                                  +---&gt;|    [{time, value}, ...]  |
+                                       +--------------------------+
+
+
+</pre><a href="#section-4-2" class="pilcrow">¶</a>
+</div>
+<p id="section-4-3">The devices or systems publishing the metrics are referred  to as "Resources" and have an
+unique "ResourceID".<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">Each metric reported by a <code>Resource</code> has an associated <code>timeseries</code>. A metric's timeseries
+is time ordered set of values (observations at points in time) for the corresponding metric.
+Metric names are represented as strings and may contain ASCII letters, digits, underscores,
+and colon. A metric's value can be one of "Gauge" or "Counter". The "Gauge" value type
+represents a scalar  value that always represents the current value being measured. The "Counter"
+value type is a cumulative value that represents a single monotonically increasing value that can
+increase or be reset to zero on restart. The Gauge and Counter can represent either a 64-bit
+floating point value or a 64-bit integer value.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">Resources also define zero or more <code>Attributes</code>. Attributes capture the dimensional data to
+identify any given combination of them for the metrics reported by the resource.
+Attributes are represented as key-value pairs and represented as strings.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-6">The data model specified in this section is consistent with the
+OpenTelemetry metrics data model <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> when at rest (also known as
+Timeseries model). See <a href="#moqt-mapping" class="auto internal xref">Section 5</a> for streaming model where
+MOQT is used for transporting the metric data.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<div id="resourceid">
+<section id="section-4.1">
+        <h3 id="name-resourceid">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-resourceid" class="section-name selfRef">ResourceID</a>
+        </h3>
+<p id="section-4.1-1">Each resource that creates metrics has a unique "ResourceID". This is created by
+taking the MAC address of the primary network interface in binary,
+computing the SHA-1 hash of it, and truncating to lower 64 bits. Note
+that SHA-1 does not provide any security properties here; it is just a
+hash that is widely implemented in hardware. If this is not possible, any
+other random stable 64-bit identifier <span class="bcp14">MAY</span> be used. The advantage of using
+the MAC address is that many other management systems use this address and it
+makes it easier to correlate. The disadvantage is that it reveals the
+MAC address.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">When carried in MOQT names, the ResourceID is encoded as exactly 16
+lowercase hexadecimal ASCII characters.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="moqt-mapping">
+<section id="section-5">
+      <h2 id="name-metrics-and-moqt">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-metrics-and-moqt" class="section-name selfRef">Metrics and MOQT</a>
+      </h2>
+<p id="section-5-1">This section maps the metrics data model defined in this specification to
+the MOQT Object Data Model (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-2" class="relref">Section 2</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>). The
+core idea is that the names of the MOQT tracks are set up such that a
+subscriber can discover and subscribe to each resource reporting metrics
+separately, pick the right granularity level, and select individual metrics
+using MOQT filters, while relays cache and serve past metric values.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="naming">
+<section id="section-5.1">
+        <h3 id="name-track-naming">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-track-naming" class="section-name selfRef">Track Naming</a>
+        </h3>
+<p id="section-5.1-1">Each resource publishes its metrics under the Track Namespace consisting of
+the following three Track Namespace Fields, each encoded as ASCII:<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1-2">
+<pre>
+("metrics.moq.arpa", "v1", &lt;resourceID&gt;)
+</pre><a href="#section-5.1-2" class="pilcrow">¶</a>
+</div>
+<p id="section-5.1-3">The Track Namespace Prefix <code>("metrics.moq.arpa", "v1")</code> is common to all
+resources, which allows a collector to discover all resources
+(see <a href="#discovery" class="auto internal xref">Section 5.7</a>). Within a resource's namespace the following tracks are
+defined:<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-4.1">
+            <p id="section-5.1-4.1.1">One data track per granularity level. The Track Name is a single ASCII
+digit identifying the level (see <a href="#levels" class="auto internal xref">Section 5.2</a>).<a href="#section-5.1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.1-4.2">
+            <p id="section-5.1-4.2.1">One catalog track with the Track Name <code>catalog</code> (see <a href="#catalog" class="auto internal xref">Section 5.3</a>).<a href="#section-5.1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.1-5">Using the serialization format in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8.8" class="relref">Section 8.8</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>,
+the Warning level track of the resource with ResourceID
+<code>8f2c4a1b0e9d7c63</code> is rendered as:<a href="#section-5.1-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.1-6">
+<pre>
+metrics.2emoq.2earpa-v1-8f2c4a1b0e9d7c63--4
+</pre><a href="#section-5.1-6" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="levels">
+<section id="section-5.2">
+        <h3 id="name-granularity-levels">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-granularity-levels" class="section-name selfRef">Granularity Levels</a>
+        </h3>
+<p id="section-5.2-1">Following granularity levels are defined in this specification, along
+with their associated track names and default publisher priorities
+(see <a href="#priorities" class="auto internal xref">Section 5.6</a>). Higher levels carry more detailed metrics: in this
+document, "lower levels" refers to Emergency (0) towards Error (3), and
+"higher levels" to Warning (4) towards Debug (7).<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+          <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Level</th>
+              <th class="text-center" rowspan="1" colspan="1">Track Name</th>
+              <th class="text-center" rowspan="1" colspan="1">Default Publisher Priority</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Emergency</td>
+              <td class="text-center" rowspan="1" colspan="1">
+                <code>0</code>
+</td>
+              <td class="text-center" rowspan="1" colspan="1">128</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Alert</td>
+              <td class="text-center" rowspan="1" colspan="1">
+                <code>1</code>
+</td>
+              <td class="text-center" rowspan="1" colspan="1">144</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Critical</td>
+              <td class="text-center" rowspan="1" colspan="1">
+                <code>2</code>
+</td>
+              <td class="text-center" rowspan="1" colspan="1">160</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Error</td>
+              <td class="text-center" rowspan="1" colspan="1">
+                <code>3</code>
+</td>
+              <td class="text-center" rowspan="1" colspan="1">176</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Warning</td>
+              <td class="text-center" rowspan="1" colspan="1">
+                <code>4</code>
+</td>
+              <td class="text-center" rowspan="1" colspan="1">192</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Notice</td>
+              <td class="text-center" rowspan="1" colspan="1">
+                <code>5</code>
+</td>
+              <td class="text-center" rowspan="1" colspan="1">208</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Informational</td>
+              <td class="text-center" rowspan="1" colspan="1">
+                <code>6</code>
+</td>
+              <td class="text-center" rowspan="1" colspan="1">224</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Debug</td>
+              <td class="text-center" rowspan="1" colspan="1">
+                <code>7</code>
+</td>
+              <td class="text-center" rowspan="1" colspan="1">240</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-5.2-3">Mapping of metrics and its reporting frequency at the aforementioned levels by
+a resource is application defined. However, it can be typical of an implementation to
+report metrics that represent aggregation of values over larger time intervals
+or that represent erroneous conditions, to use granularity that is one of
+Emergency, Alert, Critical and Error. Such metrics have characteristics of
+being less frequent and hence consume lesser bandwidth. Metrics that are
+captured more frequently and capture detailed view of system being measured
+typically are reported at the Warning through Debug levels. Such metrics,
+however, consume high bandwidth when published.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="catalog">
+<section id="section-5.3">
+        <h3 id="name-catalog-track">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-catalog-track" class="section-name selfRef">Catalog Track</a>
+        </h3>
+<p id="section-5.3-1">The catalog track describes the resource and the metrics it publishes.
+Each catalog group is one version of the catalog, and its objects mirror
+the objects of data groups:<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-2.1">
+            <p id="section-5.3-2.1.1">Object ID 0 carries the catalog header.<a href="#section-5.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-2.2">
+            <p id="section-5.3-2.2.1">Object ID N, for N &gt; 0, carries the Metric Description of the metric
+with Metric Index N.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.3-3">The Metric Index of a metric is the Object ID of its Metric Description in
+the catalog group, and is also the Object ID that carries the metric's
+value in data groups (<a href="#groups" class="auto internal xref">Section 5.4</a>). It is not encoded in the Metric
+Description itself. Metric Indices are unique across all data tracks of
+the resource within a catalog version. A subscriber uses the Metric
+Description with index N to interpret Object ID N of any data group that
+refers to that catalog version.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.3-4">The catalog header and metric description are encoded as follows, using
+the notation of <span><a href="https://rfc-editor.org/rfc/rfc9000#section-1.3" class="relref">Section 1.3</a> of [<a href="#RFC9000" class="cite xref">RFC9000</a>]</span> and the variable-length
+integer (vi64) of <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8.1" class="relref">Section 8.1</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
+<span id="name-catalog-header-object-id-0"></span><figure id="figure-1">
+          <div class="alignLeft art-text artwork" id="section-5.3-5.1">
+<pre>
+Catalog Header {
+  Version (vi64),
+  Number of Attributes (vi64),
+  Attribute (..) ...,
+}
+
+Attribute {
+  Key Length (vi64),
+  Key (..),
+  Value Length (vi64),
+  Value (..),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-catalog-header-object-id-0" class="selfRef">Catalog Header (Object ID 0)</a>
+          </figcaption></figure>
+<ul class="normal">
+<li class="normal" id="section-5.3-6.1">
+            <p id="section-5.3-6.1.1">Version: The catalog format version. This document defines version 1.<a href="#section-5.3-6.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-6.2">
+            <p id="section-5.3-6.2.1">Attribute: A resource attribute, where Key and Value are UTF-8 strings.<a href="#section-5.3-6.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<span id="name-metric-description-object-i"></span><figure id="figure-2">
+          <div class="alignLeft art-text artwork" id="section-5.3-7.1">
+<pre>
+Metric Description {
+  Metric Type (vi64),
+  Value Representation (vi64),
+  Name Length (vi64),
+  Name (..),
+  Unit Length (vi64),
+  Unit (..),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-metric-description-object-i" class="selfRef">Metric Description (Object ID N &gt; 0)</a>
+          </figcaption></figure>
+<ul class="normal">
+<li class="normal" id="section-5.3-8.1">
+            <p id="section-5.3-8.1.1">Metric Type: 0x0 for Gauge, 0x1 for Counter (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-8.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-8.2">
+            <p id="section-5.3-8.2.1">Value Representation: The encoding of the metric value in data objects
+(see <a href="#groups" class="auto internal xref">Section 5.4</a>): 0x0 for an unsigned integer, 0x1 for a signed
+integer, 0x2 for a floating point number.<a href="#section-5.3-8.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-8.3">
+            <p id="section-5.3-8.3.1">Name: The metric name, in ASCII (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-8.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-8.4">
+            <p id="section-5.3-8.4.1">Unit: The unit of the value following <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> conventions, or empty
+if not specified.<a href="#section-5.3-8.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.3-9">Receivers <span class="bcp14">MUST</span> ignore any bytes following the fields defined in this
+document, to allow future extension.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
+<p id="section-5.3-10">The Group ID of a catalog group is the catalog version number. The first
+version has Group ID 1, and each new version increments it by one, so the
+reference carried in every data group (see <a href="#groups" class="auto internal xref">Section 5.4</a>) stays small. The
+publisher <span class="bcp14">MUST</span> publish a catalog group before any data group that refers
+to it.<a href="#section-5.3-10" class="pilcrow">¶</a></p>
+<p id="section-5.3-11">Metric Indices are scoped to a catalog version: a new catalog version <span class="bcp14">MAY</span>
+assign indices differently. Publishers <span class="bcp14">SHOULD</span> keep indices stable across
+versions, which keeps Object ID filters valid (see <a href="#filtering" class="auto internal xref">Section 5.8</a>) and
+allows unchanged metric descriptions to be reused.<a href="#section-5.3-11" class="pilcrow">¶</a></p>
+<p id="section-5.3-12">Because each metric is described by its own object, a subscriber does not
+need the complete catalog before decoding data. It can decode the value
+in data Object ID N as soon as it has catalog Object ID N of the referenced
+version, and it can retrieve only the descriptions it needs by applying
+the same Object ID filter to the catalog track as to the data track.<a href="#section-5.3-12" class="pilcrow">¶</a></p>
+<p id="section-5.3-13">A subscriber <span class="bcp14">SHOULD</span> subscribe to the catalog track in parallel with the
+data tracks, using FILL_PARAMETERS selecting the current group
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.5" class="relref">Section 3.5</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>), and hold data objects until the referenced
+catalog objects are received. Catalog versions rarely change, so
+subscribers <span class="bcp14">MAY</span> cache them per Track Namespace and catalog version and
+use a cached version without waiting. A subscriber that receives a data
+group referring to a catalog version it does not have retrieves it with
+FETCH.<a href="#section-5.3-13" class="pilcrow">¶</a></p>
+<p id="section-5.3-14">The catalog track <span class="bcp14">MUST</span> use subgroup delivery and <span class="bcp14">SHOULD</span> carry the
+following Track Properties:<a href="#section-5.3-14" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.3-15.1">
+            <p id="section-5.3-15.1.1">MAX_CACHE_DURATION no shorter than that of any data track of the
+resource, so that cached data remains interpretable.<a href="#section-5.3-15.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-15.2">
+            <p id="section-5.3-15.2.1">DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
+track of the resource, so that catalog objects arrive ahead of the data
+that depends on them. This can place the catalog ahead of media using
+the default priority, which is acceptable given its small size and
+infrequent changes.<a href="#section-5.3-15.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-15.3">
+            <p id="section-5.3-15.3.1">No OBJECT_DELIVERY_TIMEOUT.<a href="#section-5.3-15.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="groups">
+<section id="section-5.4">
+        <h3 id="name-groups-and-objects">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-groups-and-objects" class="section-name selfRef">Groups and Objects</a>
+        </h3>
+<p id="section-5.4-1">Each group in a data track holds the set of metrics captured by the
+resource at one point in time. The Group ID is the capture time in
+milliseconds since the UNIX Epoch (00:00:00 UTC on 1 January 1970). This
+satisfies the requirement that Group IDs increase with time
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-2.3.1" class="relref">Section 2.3.1</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) and allows subscribers to
+express time ranges directly as Location filters (see <a href="#retrieval" class="auto internal xref">Section 5.9</a>).<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<p id="section-5.4-2">Each group is independently useful: decoding a group requires only the
+objects in that group and the catalog version it refers to. Objects
+within a group are:<a href="#section-5.4-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-3.1">
+            <p id="section-5.4-3.1.1">Object ID 0 is <span class="bcp14">REQUIRED</span> and carries the Capture Info.<a href="#section-5.4-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-3.2">
+            <p id="section-5.4-3.2.1">Object ID N, for N &gt; 0, carries the Metric Value of the metric with
+Metric Index N in the referenced catalog version, observed at the
+capture time.<a href="#section-5.4-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<span id="name-capture-info-object-id-0"></span><figure id="figure-3">
+          <div class="alignLeft art-text artwork" id="section-5.4-4.1">
+<pre>
+Capture Info {
+  Capture Timestamp Offset (vi64),
+  Catalog Version (vi64),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
+<a href="#name-capture-info-object-id-0" class="selfRef">Capture Info (Object ID 0)</a>
+          </figcaption></figure>
+<ul class="normal">
+<li class="normal" id="section-5.4-5.1">
+            <p id="section-5.4-5.1.1">Capture Timestamp Offset: The nanoseconds to add to the Group ID, in
+milliseconds, to obtain the precise capture time. The value is less
+than 1000000.<a href="#section-5.4-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-5.2">
+            <p id="section-5.4-5.2.1">Catalog Version: The Group ID of the catalog version used by this
+group (see <a href="#catalog" class="auto internal xref">Section 5.3</a>).<a href="#section-5.4-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.4-6">The Metric Value is the entire object payload, encoded according to the
+Value Representation of the metric:<a href="#section-5.4-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-7.1">
+            <p id="section-5.4-7.1.1">Unsigned integer: a vi64.<a href="#section-5.4-7.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-7.2">
+            <p id="section-5.4-7.2.1">Signed integer: a 64-bit two's complement integer in network byte
+order.<a href="#section-5.4-7.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-7.3">
+            <p id="section-5.4-7.3.1">Floating point: an IEEE 754 binary64 value in network byte order.<a href="#section-5.4-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.4-8">A resource that does not report a given metric at a capture time simply
+omits that object.
+A subscriber or relay cannot infer anything from a missing Object ID
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-2.1.2" class="relref">Section 2.1.2</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>). The publisher <span class="bcp14">MUST</span> therefore include the
+Prior Object ID Gap Object Property (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-10.9" class="relref">Section 10.9</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) on the
+object that follows any skipped Object IDs, signaling that they do not
+exist in the group. The publisher <span class="bcp14">MUST</span> also end each group with an
+object with the End of Group Object Status (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-11.1.1" class="relref">Section 11.1.1</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>)
+and an Object ID one greater than the largest Object ID carrying a metric
+value, so that the receiver knows that no further metrics exist in the
+group, including skipped metrics after the last value. Object Status is not
+carried in FETCH responses, which convey non-existent objects as
+described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.2.2" class="relref">Section 3.2.2</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-5.4-8" class="pilcrow">¶</a></p>
+<p id="section-5.4-9">Resources typically do not capture metrics every millisecond, so Group IDs
+in a data track are sparse. The publisher <span class="bcp14">SHOULD</span> include the Prior Group ID
+Gap Object Property (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-10.8" class="relref">Section 10.8</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) on Object 0, set to the
+number of milliseconds since the previous capture minus one. This allows relays and fetches to know that
+the intervening groups will never exist, rather than leaving them in the
+unknown state.<a href="#section-5.4-9" class="pilcrow">¶</a></p>
+<p id="section-5.4-10">All objects of a group <span class="bcp14">MUST</span> be sent in a single subgroup with Subgroup ID
+0, so that Object 0 is delivered ahead of the values that depend on it.
+The Datagram delivery mode <span class="bcp14">MUST NOT</span> be used. An example of a group is
+shown in <a href="#examples" class="auto internal xref">Section 5.10</a>.<a href="#section-5.4-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="track-properties">
+<section id="section-5.5">
+        <h3 id="name-track-properties">
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-track-properties" class="section-name selfRef">Track Properties</a>
+        </h3>
+<p id="section-5.5-1">Publishers <span class="bcp14">SHOULD</span> include the following Track Properties
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8.4" class="relref">Section 8.4</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) on each data track:<a href="#section-5.5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.5-2.1">
+            <p id="section-5.5-2.1.1">DEFAULT_PUBLISHER_PRIORITY: see <a href="#priorities" class="auto internal xref">Section 5.6</a>.<a href="#section-5.5-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.5-2.2">
+            <p id="section-5.5-2.2.1">DEFAULT_PUBLISHER_GROUP_ORDER: Ascending (0x1), so that collectors
+receive samples in capture order. Subscribers interested only in the
+freshest value, such as live dashboards, <span class="bcp14">MAY</span> request Descending group
+order.<a href="#section-5.5-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.5-2.3">
+            <p id="section-5.5-2.3.1">MAX_CACHE_DURATION: the retention time for which relays may serve
+cached samples. Lower granularity levels are typically retained longer
+than higher granularity levels.<a href="#section-5.5-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.5-2.4">
+            <p id="section-5.5-2.4.1">OBJECT_DELIVERY_TIMEOUT: for high granularity levels, a timeout after
+which a stale sample is dropped rather than delivered late.<a href="#section-5.5-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="priorities">
+<section id="section-5.6">
+        <h3 id="name-priorities">
+<a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-priorities" class="section-name selfRef">Priorities</a>
+        </h3>
+<p id="section-5.6-1">Metrics are expected to yield to the primary application under
+congestion. The publisher <span class="bcp14">SHOULD</span> set the DEFAULT_PUBLISHER_PRIORITY Track
+Property of each data track to the value in <a href="#levels" class="auto internal xref">Section 5.2</a>, or another value
+that keeps lower granularity levels ahead of higher granularity levels.
+These values are in the lower priority half of the range, behind the
+MOQT default of 128 typically used for media, with Emergency at par with
+the default.<a href="#section-5.6-1" class="pilcrow">¶</a></p>
+<p id="section-5.6-2">Subscribers can adjust the relative importance of metrics against other
+subscriptions in the session using the SUBSCRIBER_PRIORITY parameter,
+which is considered before publisher priority.<a href="#section-5.6-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="discovery">
+<section id="section-5.7">
+        <h3 id="name-discovery-and-subscription">
+<a href="#section-5.7" class="section-number selfRef">5.7. </a><a href="#name-discovery-and-subscription" class="section-name selfRef">Discovery and Subscription</a>
+        </h3>
+<p id="section-5.7-1">A collector discovers resources by sending SUBSCRIBE_NAMESPACE with the
+Track Namespace Prefix <code>("metrics.moq.arpa", "v1")</code>. The relay responds
+with a NAMESPACE message for each resource namespace, and NAMESPACE_DONE
+when a resource stops publishing.<a href="#section-5.7-1" class="pilcrow">¶</a></p>
+<p id="section-5.7-2">For each discovered resource, the collector subscribes by name to the
+catalog track and to the data tracks of the levels it wants to receive
+continuously, for example levels 0 to 3. Resources that start publishing
+later are learned from subsequent NAMESPACE messages. Tracks of other
+levels are not subscribed to and remain available from the relay cache
+via FETCH (see <a href="#retrieval" class="auto internal xref">Section 5.9</a>).<a href="#section-5.7-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="filtering">
+<section id="section-5.8">
+        <h3 id="name-filtering">
+<a href="#section-5.8" class="section-number selfRef">5.8. </a><a href="#name-filtering" class="section-name selfRef">Filtering</a>
+        </h3>
+<p id="section-5.8-1">MOQT Range Filters (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.3.2" class="relref">Section 3.3.2</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) carried
+in SUBSCRIBE, FETCH or FILL_PARAMETERS allow a collector to further reduce
+the data delivered within a track:<a href="#section-5.8-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.8-2.1">
+            <p id="section-5.8-2.1.1">An Object ID range filter selects specific metrics by Metric Index.
+The filter <span class="bcp14">MUST</span> include Object ID 0, which identifies the catalog
+version. For example, ranges <code>[0, 0]</code> and
+<code>[3, 5]</code> deliver Object 0 and the metrics with indices 3 to 5. The same
+filter applied to the catalog track delivers only the catalog header
+and the descriptions of those metrics. A subscriber updates its filters
+when a new catalog version assigns indices differently.<a href="#section-5.8-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.8-2.2">
+            <p id="section-5.8-2.2.1">An Object Property range filter selects individual samples based on
+application-defined Object Properties. For example, an application can
+mark samples that cross a configured threshold with an Object Property
+from the application-specific range, so that a collector subscribed to
+a high granularity level receives only those samples. Such properties
+are outside the scope of this document.<a href="#section-5.8-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.8-3">Range Filters are only available when the relay advertises a non-zero
+MAX_FILTER_RANGES. Collectors therefore treat filtering as an
+optimization and <span class="bcp14">MUST</span> be able to process unfiltered tracks.<a href="#section-5.8-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="retrieval">
+<section id="section-5.9">
+        <h3 id="name-retrieval-of-past-metrics">
+<a href="#section-5.9" class="section-number selfRef">5.9. </a><a href="#name-retrieval-of-past-metrics" class="section-name selfRef">Retrieval of Past Metrics</a>
+        </h3>
+<p id="section-5.9-1">Since Group IDs are capture times in milliseconds, a time range of
+metrics corresponds directly to a range of Locations:<a href="#section-5.9-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.9-2.1">
+            <p id="section-5.9-2.1.1">A collector retrieves past samples for a time window <code>[T1, T2]</code> by
+sending FETCH with a Location filter from {T1, 0} to {T2, max}. The
+request is served from the relay cache, subject to MAX_CACHE_DURATION.<a href="#section-5.9-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.9-2.2">
+            <p id="section-5.9-2.2.1">A collector that wants recent history followed by live samples sends a
+SUBSCRIBE with a Location filter starting at the Next Object, together
+with FILL_PARAMETERS whose Location filter selects the starting point
+of the history. The relay delivers the history on a fill fetch stream
+and live samples on the subscription, without gaps or duplicates
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.4" class="relref">Section 3.4</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>).<a href="#section-5.9-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.9-2.3">
+            <p id="section-5.9-2.3.1">A collector that only needs live samples subscribes with a Location
+filter starting at the Next Group.<a href="#section-5.9-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.9-3">This enables the "just in time" collection model: resources publish all
+levels to a nearby relay, while collectors subscribe to the low
+granularity levels and fetch the high granularity levels for the time
+windows of interest, for example around an alert.<a href="#section-5.9-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="examples">
+<section id="section-5.10">
+        <h3 id="name-examples">
+<a href="#section-5.10" class="section-number selfRef">5.10. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
+        </h3>
+<p id="section-5.10-1">This example follows a resource that reports two metrics on its Warning
+level track: <code>cpu_usage_percentage</code> and <code>cpu_temperature</code>.<a href="#section-5.10-1" class="pilcrow">¶</a></p>
+<div id="example-catalog">
+<section id="section-5.10.1">
+          <h4 id="name-catalog">
+<a href="#section-5.10.1" class="section-number selfRef">5.10.1. </a><a href="#name-catalog" class="section-name selfRef">Catalog</a>
+          </h4>
+<p id="section-5.10.1-1">The resource publishes catalog version 1 as Group 1 of its catalog track.<a href="#section-5.10.1-1" class="pilcrow">¶</a></p>
+<span id="name-catalog-track-example"></span><figure id="figure-4">
+            <div class="alignLeft art-ascii-art art-text artwork" id="section-5.10.1-2.1">
+<pre>
+Track "catalog", Group 1 (catalog version 1)
+
+ Obj  Content
+ ---  ------------------------------------------------------------
+  0   Catalog Header      version 1
+                          location = us-east-2, os = ubuntu20.4
+  1   Metric Description  cpu_usage_percentage  Gauge  unsigned  %
+  2   Metric Description  cpu_temperature       Gauge  float     Cel
+</pre>
+</div>
+<figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
+<a href="#name-catalog-track-example" class="selfRef">Catalog track example</a>
+            </figcaption></figure>
+</section>
+</div>
+<div id="example-data">
+<section id="section-5.10.2">
+          <h4 id="name-data">
+<a href="#section-5.10.2" class="section-number selfRef">5.10.2. </a><a href="#name-data" class="section-name selfRef">Data</a>
+          </h4>
+<p id="section-5.10.2-1">The resource captures both metrics at 15:59:51.000123456 UTC on 7 July
+2024 (Group 1720367991000). One second later it captures only
+<code>cpu_temperature</code> (Group 1720367992000).<a href="#section-5.10.2-1" class="pilcrow">¶</a></p>
+<span id="name-data-track-example"></span><figure id="figure-5">
+            <div class="alignLeft art-ascii-art art-text artwork" id="section-5.10.2-2.1">
+<pre>
+Track "4", Group 1720367991000
+
+ Obj  Content                       Meaning
+ ---  ----------------------------  ------------------------------
+  0   Capture Info                  captured 15:59:51.000123456,
+        offset 123456 ns            decode with catalog version 1
+        catalog 1
+  1   Metric Value  99              cpu_usage_percentage = 99 %
+  2   Metric Value  45.1            cpu_temperature = 45.1 Cel
+  3   End of Group                  no further metrics
+
+Track "4", Group 1720367992000
+
+ Obj  Content                       Meaning
+ ---  ----------------------------  ------------------------------
+  0   Capture Info                  captured 15:59:52.000004211,
+        offset 4211 ns              decode with catalog version 1
+        catalog 1
+        [Prior Group ID Gap 999]    no groups since previous one
+  2   Metric Value  44.8            cpu_temperature = 44.8 Cel
+        [Prior Object ID Gap 1]     Object 1 not reported
+  3   End of Group                  no further metrics
+
+[ ] denotes an Object Property.
+</pre>
+</div>
+<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
+<a href="#name-data-track-example" class="selfRef">Data track example</a>
+            </figcaption></figure>
+</section>
+</div>
+<div id="example-result">
+<section id="section-5.10.3">
+          <h4 id="name-result">
+<a href="#section-5.10.3" class="section-number selfRef">5.10.3. </a><a href="#name-result" class="section-name selfRef">Result</a>
+          </h4>
+<p id="section-5.10.3-1">A collector holding catalog version 1 turns the two groups into the
+following time series (<a href="#model" class="auto internal xref">Section 4</a>), with capture times in UTC on 7 July
+2024:<a href="#section-5.10.3-1" class="pilcrow">¶</a></p>
+<span id="name-decoded-time-series"></span><table class="center" id="table-2">
+            <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-decoded-time-series" class="selfRef">Decoded time series</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Capture time</th>
+                <th class="text-left" rowspan="1" colspan="1">Metric</th>
+                <th class="text-right" rowspan="1" colspan="1">Value</th>
+                <th class="text-left" rowspan="1" colspan="1">Unit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">15:59:51.000123456</td>
+                <td class="text-left" rowspan="1" colspan="1">cpu_usage_percentage</td>
+                <td class="text-right" rowspan="1" colspan="1">99</td>
+                <td class="text-left" rowspan="1" colspan="1">%</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">15:59:51.000123456</td>
+                <td class="text-left" rowspan="1" colspan="1">cpu_temperature</td>
+                <td class="text-right" rowspan="1" colspan="1">45.1</td>
+                <td class="text-left" rowspan="1" colspan="1">Cel</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">15:59:52.000004211</td>
+                <td class="text-left" rowspan="1" colspan="1">cpu_temperature</td>
+                <td class="text-right" rowspan="1" colspan="1">44.8</td>
+                <td class="text-left" rowspan="1" colspan="1">Cel</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="msf">
+<section id="section-6">
+      <h2 id="name-use-with-msf">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-use-with-msf" class="section-name selfRef">Use with MSF</a>
+      </h2>
+<p id="section-6-1">An MOQT Streaming Format (MSF) <span>[<a href="#MSF" class="cite xref">MSF</a>]</span> catalog can
+direct a client to publish metrics using a <code>publishTracks</code> entry with a
+<code>packaging</code> of <code>"moqmetrics"</code> and a <code>role</code> of <code>"metrics"</code>. In such an
+entry:<a href="#section-6-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6-2.1">
+          <p id="section-6-2.1.1"><code>namespace</code> is the Track Namespace of <a href="#naming" class="auto internal xref">Section 5.1</a> rendered using
+<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8.8" class="relref">Section 8.8</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>, with <code>%resourceId%</code> as a placeholder for the
+client's ResourceID: <code>metrics.2emoq.2earpa-v1-%resourceId%</code>.<a href="#section-6-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-6-2.2">
+          <p id="section-6-2.2.1"><code>name</code> is the data track for a granularity level (<a href="#levels" class="auto internal xref">Section 5.2</a>). A
+catalog can include one entry per level it wants the client to
+publish.<a href="#section-6-2.2.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-6-3">A client publishing any data track in this way also publishes the
+catalog track (<a href="#catalog" class="auto internal xref">Section 5.3</a>) in the same namespace. The <code>connectionUri</code>
+and <code>token</code> of the entry apply to the catalog track as well.<a href="#section-6-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana">
+<section id="section-7">
+      <h2 id="name-iana-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-7-1">This document has no IANA actions.<a href="#section-7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-8">
+      <h2 id="name-security-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-8-1">TODO<a href="#section-8-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-9">
+      <h2 id="name-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-9.1">
+        <h3 id="name-normative-references">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="MOQT">[MOQT]</dt>
+        <dd>
+<span class="refAuthor">Nandakumar, S.</span>, <span class="refAuthor">Vasiliev, V.</span>, <span class="refAuthor">Swett, I.</span>, and <span class="refAuthor">A. Frindell</span>, <span class="refTitle">"Media over QUIC Transport"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-moq-transport-22</span>, <time datetime="2026-10-01" class="refDate">1 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22">https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9000">[RFC9000]</dt>
+      <dd>
+<span class="refAuthor">Iyengar, J., Ed.</span> and <span class="refAuthor">M. Thomson, Ed.</span>, <span class="refTitle">"QUIC: A UDP-Based Multiplexed and Secure Transport"</span>, <span class="seriesInfo">RFC 9000</span>, <span class="seriesInfo">DOI 10.17487/RFC9000</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9000">https://www.rfc-editor.org/rfc/rfc9000</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-9.2">
+        <h3 id="name-informative-references">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="MSF">[MSF]</dt>
+        <dd>
+<span class="refAuthor">Law, W.</span> and <span class="refAuthor">S. Nandakumar</span>, <span class="refTitle">"MOQT Streaming Format"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-moq-msf-01</span>, <time datetime="2026-06-02" class="refDate">2 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-msf-01">https://datatracker.ietf.org/doc/html/draft-ietf-moq-msf-01</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="OTEL">[OTEL]</dt>
+      <dd>
+<span class="refAuthor">OpenTelemetry</span>, <span class="refTitle">"OpenTelemetry Metrics Data Model"</span>, <span>n.d.</span>, <span>&lt;<a href="https://opentelemetry.io/docs/specs/otel/metrics/data-model/">https://opentelemetry.io/docs/specs/otel/metrics/data-model/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="changes-from-the-ietf122-version">
+<section id="appendix-A">
+      <h2 id="name-changes-from-the-ietf122-ve">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-changes-from-the-ietf122-ve" class="section-name selfRef">Changes from the ietf122 Version</a>
+      </h2>
+<ul class="normal">
+<li class="normal" id="appendix-A-1.1">
+          <p id="appendix-A-1.1.1">Aligned with draft-ietf-moq-transport-22.<a href="#appendix-A-1.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.2">
+          <p id="appendix-A-1.2.1">Added an Architecture Overview describing metrics sharing a session
+with media, and metrics as the primary data.<a href="#appendix-A-1.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.3">
+          <p id="appendix-A-1.3.1">Track Namespace is now the tuple ("metrics.moq.arpa", "v1",
+resourceID); the string form uses the MOQT serialization format
+instead of a moq:// URL.<a href="#appendix-A-1.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.4">
+          <p id="appendix-A-1.4.1">Group ID is the capture time in milliseconds since the UNIX Epoch as a
+full 64-bit value.<a href="#appendix-A-1.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.5">
+          <p id="appendix-A-1.5.1">Attributes and metric names moved to a versioned catalog track with
+one object per metric. Each data group refers to the catalog version
+that maps its Object IDs to metrics, which removes the dependency on
+previous groups.<a href="#appendix-A-1.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.6">
+          <p id="appendix-A-1.6.1">Object payloads use a binary encoding following the MOQT notation.<a href="#appendix-A-1.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.7">
+          <p id="appendix-A-1.7.1">Each group is sent as a single subgroup, ending with an End of Group
+object, and skipped metrics are signaled with Prior Object ID Gap.<a href="#appendix-A-1.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.8">
+          <p id="appendix-A-1.8.1">Added the use of Prior Group ID Gap, Track Properties for priority,
+group order, caching and delivery timeouts, SUBSCRIBE_NAMESPACE for
+discovery, range filters for metric selection, and FETCH and fill for
+time range retrieval.<a href="#appendix-A-1.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.9">
+          <p id="appendix-A-1.9.1">Added use with MSF.<a href="#appendix-A-1.9.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-B">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-B-1">Thanks to TODO for contributions and suggestions to this
+specification.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-C">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Cullen Jennings</span></div>
+<div dir="auto" class="left"><span class="org">Cisco</span></div>
+<div dir="auto" class="left"><span class="country-name">Canada</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:fluffy@iii.ca" class="email">fluffy@iii.ca</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Suhas Nandakumar</span></div>
+<div dir="auto" class="left"><span class="org">Cisco</span></div>
+<div dir="auto" class="left"><span class="country-name">United States of America</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:snandaku@cisco.com" class="email">snandaku@cisco.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
