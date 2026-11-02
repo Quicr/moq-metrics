@@ -1212,6 +1212,20 @@ information over the Media Over QUIC Transport (MOQT).<a href="#section-abstract
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11">
                 <p id="section-toc.1-1.5.2.11.1"><a href="#section-5.11" class="auto internal xref">5.11</a>. <a href="#name-examples" class="internal xref">Examples</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11.2.1">
+                    <p id="section-toc.1-1.5.2.11.2.1.1"><a href="#section-5.11.1" class="auto internal xref">5.11.1</a>.  <a href="#name-catalog" class="internal xref">Catalog</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11.2.2">
+                    <p id="section-toc.1-1.5.2.11.2.2.1"><a href="#section-5.11.2" class="auto internal xref">5.11.2</a>.  <a href="#name-data" class="internal xref">Data</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11.2.3">
+                    <p id="section-toc.1-1.5.2.11.2.3.1"><a href="#section-5.11.3" class="auto internal xref">5.11.3</a>.  <a href="#name-result" class="internal xref">Result</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11.2.4">
+                    <p id="section-toc.1-1.5.2.11.2.4.1"><a href="#section-5.11.4" class="auto internal xref">5.11.4</a>.  <a href="#name-encoding" class="internal xref">Encoding</a></p>
+</li>
+                </ul>
 </li>
             </ul>
 </li>
@@ -1977,112 +1991,145 @@ windows of interest, for example around an alert.<a href="#section-5.10-3" class
         <h3 id="name-examples">
 <a href="#section-5.11" class="section-number selfRef">5.11. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
         </h3>
-<p id="section-5.11-1">The following examples show decoded object payloads.<a href="#section-5.11-1" class="pilcrow">¶</a></p>
-<span id="name-catalog-track-group-1"></span><table class="center" id="table-2">
-          <caption>
-<a href="#table-2" class="selfRef">Table 2</a>:
-<a href="#name-catalog-track-group-1" class="selfRef">Catalog track, Group 1</a>
-          </caption>
-<thead>
-            <tr>
-              <th class="text-center" rowspan="1" colspan="1">Object</th>
-              <th class="text-left" rowspan="1" colspan="1">Structure</th>
-              <th class="text-left" rowspan="1" colspan="1">Content</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">0</td>
-              <td class="text-left" rowspan="1" colspan="1">Catalog Header</td>
-              <td class="text-left" rowspan="1" colspan="1">Version 1; location = us-east-2, os = ubuntu20.4</td>
-            </tr>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">1</td>
-              <td class="text-left" rowspan="1" colspan="1">Metric Description</td>
-              <td class="text-left" rowspan="1" colspan="1">cpu_usage_percentage; Gauge; unsigned; unit %</td>
-            </tr>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">2</td>
-              <td class="text-left" rowspan="1" colspan="1">Metric Description</td>
-              <td class="text-left" rowspan="1" colspan="1">cpu_temperature; Gauge; floating point; unit Cel</td>
-            </tr>
-          </tbody>
-        </table>
-<span id="name-warning-track-group-1720367"></span><table class="center" id="table-3">
-          <caption>
-<a href="#table-3" class="selfRef">Table 3</a>:
-<a href="#name-warning-track-group-1720367" class="selfRef">Warning track, Group 1720367991000</a>
-          </caption>
-<thead>
-            <tr>
-              <th class="text-center" rowspan="1" colspan="1">Object</th>
-              <th class="text-left" rowspan="1" colspan="1">Structure</th>
-              <th class="text-left" rowspan="1" colspan="1">Content</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">0</td>
-              <td class="text-left" rowspan="1" colspan="1">Capture Info</td>
-              <td class="text-left" rowspan="1" colspan="1">Offset 123456 ns; Catalog Version 1</td>
-            </tr>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">1</td>
-              <td class="text-left" rowspan="1" colspan="1">Metric Value</td>
-              <td class="text-left" rowspan="1" colspan="1">99 (cpu_usage_percentage)</td>
-            </tr>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">2</td>
-              <td class="text-left" rowspan="1" colspan="1">Metric Value</td>
-              <td class="text-left" rowspan="1" colspan="1">45.1 (cpu_temperature)</td>
-            </tr>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">3</td>
-              <td class="text-left" rowspan="1" colspan="1">End of Group</td>
-              <td class="text-left" rowspan="1" colspan="1">Object Status 0x3, no payload</td>
-            </tr>
-          </tbody>
-        </table>
-<p id="section-5.11-4">One second later, only cpu_temperature is reported. Object 0 carries
-Prior Group ID Gap = 999, as Group IDs 1720367991001 to 1720367991999
-will never exist, and Object 2 carries Prior Object ID Gap = 1, as
-Object 1 does not exist in this group.<a href="#section-5.11-4" class="pilcrow">¶</a></p>
-<span id="name-warning-track-group-17203679"></span><table class="center" id="table-4">
-          <caption>
-<a href="#table-4" class="selfRef">Table 4</a>:
-<a href="#name-warning-track-group-17203679" class="selfRef">Warning track, Group 1720367992000</a>
-          </caption>
-<thead>
-            <tr>
-              <th class="text-center" rowspan="1" colspan="1">Object</th>
-              <th class="text-left" rowspan="1" colspan="1">Structure</th>
-              <th class="text-left" rowspan="1" colspan="1">Content</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">0</td>
-              <td class="text-left" rowspan="1" colspan="1">Capture Info</td>
-              <td class="text-left" rowspan="1" colspan="1">Offset 4211 ns; Catalog Version 1</td>
-            </tr>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">2</td>
-              <td class="text-left" rowspan="1" colspan="1">Metric Value</td>
-              <td class="text-left" rowspan="1" colspan="1">44.8 (cpu_temperature)</td>
-            </tr>
-            <tr>
-              <td class="text-center" rowspan="1" colspan="1">3</td>
-              <td class="text-left" rowspan="1" colspan="1">End of Group</td>
-              <td class="text-left" rowspan="1" colspan="1">Object Status 0x3, no payload</td>
-            </tr>
-          </tbody>
-        </table>
-<p id="section-5.11-6">The Capture Info of Group 1720367991000 is encoded in 4 bytes:<a href="#section-5.11-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-5.11-7">
+<p id="section-5.11-1">This example follows a resource that reports two metrics on its Warning
+level track: <code>cpu_usage_percentage</code> and <code>cpu_temperature</code>.<a href="#section-5.11-1" class="pilcrow">¶</a></p>
+<div id="example-catalog">
+<section id="section-5.11.1">
+          <h4 id="name-catalog">
+<a href="#section-5.11.1" class="section-number selfRef">5.11.1. </a><a href="#name-catalog" class="section-name selfRef">Catalog</a>
+          </h4>
+<p id="section-5.11.1-1">The resource publishes catalog version 1 as Group 1 of its catalog track.
+Each metric is described by its own object, and the Object ID is the
+Metric Index used in data groups.<a href="#section-5.11.1-1" class="pilcrow">¶</a></p>
+<span id="name-catalog-track-example"></span><figure id="figure-4">
+            <div class="alignLeft art-ascii-art art-text artwork" id="section-5.11.1-2.1">
 <pre>
-c1 e2 40   Capture Timestamp Offset = 123456 (vi64)
-01         Catalog Version = 1 (vi64)
-</pre><a href="#section-5.11-7" class="pilcrow">¶</a>
+Track "catalog", Group 1 (catalog version 1)
+
+ Obj  Content
+ ---  ------------------------------------------------------------
+  0   Catalog Header      version 1
+                          location = us-east-2, os = ubuntu20.4
+  1   Metric Description  cpu_usage_percentage  Gauge  unsigned  %
+  2   Metric Description  cpu_temperature       Gauge  float     Cel
+</pre>
+</div>
+<figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
+<a href="#name-catalog-track-example" class="selfRef">Catalog track example</a>
+            </figcaption></figure>
+</section>
+</div>
+<div id="example-data">
+<section id="section-5.11.2">
+          <h4 id="name-data">
+<a href="#section-5.11.2" class="section-number selfRef">5.11.2. </a><a href="#name-data" class="section-name selfRef">Data</a>
+          </h4>
+<p id="section-5.11.2-1">The resource captures both metrics at 15:59:51.000123456 UTC on 7 July
+2024 (Group 1720367991000). One second later it captures only
+<code>cpu_temperature</code> (Group 1720367992000).<a href="#section-5.11.2-1" class="pilcrow">¶</a></p>
+<span id="name-data-track-example"></span><figure id="figure-5">
+            <div class="alignLeft art-ascii-art art-text artwork" id="section-5.11.2-2.1">
+<pre>
+Track "4", Group 1720367991000
+
+ Obj  Content                       Meaning
+ ---  ----------------------------  ------------------------------
+  0   Capture Info                  captured 15:59:51.000123456,
+        offset 123456 ns            decode with catalog version 1
+        catalog 1
+  1   Metric Value  99              cpu_usage_percentage = 99 %
+  2   Metric Value  45.1            cpu_temperature = 45.1 Cel
+  3   End of Group                  no further metrics
+
+Track "4", Group 1720367992000
+
+ Obj  Content                       Meaning
+ ---  ----------------------------  ------------------------------
+  0   Capture Info                  captured 15:59:52.000004211,
+        offset 4211 ns              decode with catalog version 1
+        catalog 1
+        [Prior Group ID Gap 999]    no groups since previous one
+  2   Metric Value  44.8            cpu_temperature = 44.8 Cel
+        [Prior Object ID Gap 1]     Object 1 not reported
+  3   End of Group                  no further metrics
+
+[ ] denotes an Object Property.
+</pre>
+</div>
+<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
+<a href="#name-data-track-example" class="selfRef">Data track example</a>
+            </figcaption></figure>
+</section>
+</div>
+<div id="example-result">
+<section id="section-5.11.3">
+          <h4 id="name-result">
+<a href="#section-5.11.3" class="section-number selfRef">5.11.3. </a><a href="#name-result" class="section-name selfRef">Result</a>
+          </h4>
+<p id="section-5.11.3-1">A collector holding catalog version 1 turns the two groups into the
+following time series (<a href="#model" class="auto internal xref">Section 4</a>), with capture times in UTC on 7 July
+2024:<a href="#section-5.11.3-1" class="pilcrow">¶</a></p>
+<span id="name-decoded-time-series"></span><table class="center" id="table-2">
+            <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-decoded-time-series" class="selfRef">Decoded time series</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Capture time</th>
+                <th class="text-left" rowspan="1" colspan="1">Metric</th>
+                <th class="text-right" rowspan="1" colspan="1">Value</th>
+                <th class="text-left" rowspan="1" colspan="1">Unit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">15:59:51.000123456</td>
+                <td class="text-left" rowspan="1" colspan="1">cpu_usage_percentage</td>
+                <td class="text-right" rowspan="1" colspan="1">99</td>
+                <td class="text-left" rowspan="1" colspan="1">%</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">15:59:51.000123456</td>
+                <td class="text-left" rowspan="1" colspan="1">cpu_temperature</td>
+                <td class="text-right" rowspan="1" colspan="1">45.1</td>
+                <td class="text-left" rowspan="1" colspan="1">Cel</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">15:59:52.000004211</td>
+                <td class="text-left" rowspan="1" colspan="1">cpu_temperature</td>
+                <td class="text-right" rowspan="1" colspan="1">44.8</td>
+                <td class="text-left" rowspan="1" colspan="1">Cel</td>
+              </tr>
+            </tbody>
+          </table>
+</section>
+</div>
+<div id="example-encoding">
+<section id="section-5.11.4">
+          <h4 id="name-encoding">
+<a href="#section-5.11.4" class="section-number selfRef">5.11.4. </a><a href="#name-encoding" class="section-name selfRef">Encoding</a>
+          </h4>
+<p id="section-5.11.4-1">The payloads of Objects 0, 1 and 2 of Group 1720367991000 are encoded as
+follows:<a href="#section-5.11.4-1" class="pilcrow">¶</a></p>
+<span id="name-encoded-payload-example"></span><figure id="figure-6">
+            <div class="alignLeft art-text artwork" id="section-5.11.4-2.1">
+<pre>
+Object 0 (Capture Info), 4 bytes
+  c1 e2 40                   Capture Timestamp Offset = 123456 (vi64)
+  01                         Catalog Version = 1 (vi64)
+
+Object 1 (Metric Value, unsigned), 1 byte
+  63                         99 (vi64)
+
+Object 2 (Metric Value, float), 8 bytes
+  40 46 8c cc cc cc cc cd    45.1 (IEEE 754 binary64)
+</pre>
+</div>
+<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
+<a href="#name-encoded-payload-example" class="selfRef">Encoded payload example</a>
+            </figcaption></figure>
+</section>
 </div>
 </section>
 </div>
