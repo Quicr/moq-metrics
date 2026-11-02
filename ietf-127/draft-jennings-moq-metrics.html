@@ -1582,15 +1582,20 @@ the objects of data groups:<a href="#section-5.3-1" class="pilcrow">¶</a></p>
             <p id="section-5.3-2.1.1">Object ID 0 carries the catalog header.<a href="#section-5.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.3-2.2">
-            <p id="section-5.3-2.2.1">Object ID N, for N &gt; 0, describes the metric with Metric Index N, whose
-value is carried as Object ID N in data groups.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-5.3-2.2.1">Object ID N, for N &gt; 0, carries the Metric Description of the metric
+with Metric Index N.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.3-3">The catalog header and metric description are encoded as follows, using
+<p id="section-5.3-3">The Metric Index of a metric is the Object ID of its Metric Description in
+the catalog group, and is also the Object ID that carries the metric's
+value in data groups (<a href="#groups" class="auto internal xref">Section 5.4</a>). It is not encoded in the Metric
+Description itself. Metric Indices are unique across all data tracks of
+the resource within a catalog version.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<p id="section-5.3-4">The catalog header and metric description are encoded as follows, using
 the notation of <span><a href="https://rfc-editor.org/rfc/rfc9000#section-1.3" class="relref">Section 1.3</a> of [<a href="#RFC9000" class="cite xref">RFC9000</a>]</span> and the variable-length
-integer (vi64) of <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8.1" class="relref">Section 8.1</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+integer (vi64) of <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8.1" class="relref">Section 8.1</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
 <span id="name-catalog-header-object-id-0"></span><figure id="figure-1">
-          <div class="alignLeft art-text artwork" id="section-5.3-4.1">
+          <div class="alignLeft art-text artwork" id="section-5.3-5.1">
 <pre>
 Catalog Header {
   Version (vi64),
@@ -1610,15 +1615,15 @@ Attribute {
 <a href="#name-catalog-header-object-id-0" class="selfRef">Catalog Header (Object ID 0)</a>
           </figcaption></figure>
 <ul class="normal">
-<li class="normal" id="section-5.3-5.1">
-            <p id="section-5.3-5.1.1">Version: The catalog format version. This document defines version 1.<a href="#section-5.3-5.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3-6.1">
+            <p id="section-5.3-6.1.1">Version: The catalog format version. This document defines version 1.<a href="#section-5.3-6.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-5.2">
-            <p id="section-5.3-5.2.1">Attribute: A resource attribute, where Key and Value are UTF-8 strings.<a href="#section-5.3-5.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-6.2">
+            <p id="section-5.3-6.2.1">Attribute: A resource attribute, where Key and Value are UTF-8 strings.<a href="#section-5.3-6.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <span id="name-metric-description-object-i"></span><figure id="figure-2">
-          <div class="alignLeft art-text artwork" id="section-5.3-6.1">
+          <div class="alignLeft art-text artwork" id="section-5.3-7.1">
 <pre>
 Metric Description {
   Metric Type (vi64),
@@ -1634,65 +1639,70 @@ Metric Description {
 <figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
 <a href="#name-metric-description-object-i" class="selfRef">Metric Description (Object ID N &gt; 0)</a>
           </figcaption></figure>
+<p id="section-5.3-8">A Metric Description is the payload of catalog Object ID N, for N &gt; 0.
+A subscriber uses it to interpret the data objects with Object ID N in any
+data group that refers to this catalog version: the Name and Metric Type
+identify the metric, and the Value Representation determines how the
+Metric Value is decoded.<a href="#section-5.3-8" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-7.1">
-            <p id="section-5.3-7.1.1">Metric Type: 0x0 for Gauge, 0x1 for Counter (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-7.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3-9.1">
+            <p id="section-5.3-9.1.1">Metric Type: 0x0 for Gauge, 0x1 for Counter (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-9.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-7.2">
-            <p id="section-5.3-7.2.1">Value Representation: The encoding of the metric value in data objects
+          <li class="normal" id="section-5.3-9.2">
+            <p id="section-5.3-9.2.1">Value Representation: The encoding of the metric value in data objects
 (see <a href="#groups" class="auto internal xref">Section 5.4</a>): 0x0 for an unsigned integer, 0x1 for a signed
-integer, 0x2 for a floating point number.<a href="#section-5.3-7.2.1" class="pilcrow">¶</a></p>
+integer, 0x2 for a floating point number.<a href="#section-5.3-9.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-7.3">
-            <p id="section-5.3-7.3.1">Subgroup ID: The Subgroup ID carrying the metric in data groups
-(see <a href="#subgroups" class="auto internal xref">Section 5.5</a>).<a href="#section-5.3-7.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-9.3">
+            <p id="section-5.3-9.3.1">Subgroup ID: The Subgroup ID carrying the metric in data groups
+(see <a href="#subgroups" class="auto internal xref">Section 5.5</a>).<a href="#section-5.3-9.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-7.4">
-            <p id="section-5.3-7.4.1">Name: The metric name.<a href="#section-5.3-7.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-9.4">
+            <p id="section-5.3-9.4.1">Name: The metric name, in ASCII (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-9.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-7.5">
-            <p id="section-5.3-7.5.1">Unit: The unit of the value following <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> conventions, or empty
-if not specified.<a href="#section-5.3-7.5.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-9.5">
+            <p id="section-5.3-9.5.1">Unit: The unit of the value following <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> conventions, or empty
+if not specified.<a href="#section-5.3-9.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.3-8">Receivers <span class="bcp14">MUST</span> ignore any bytes following the fields defined in this
-document, to allow future extension.<a href="#section-5.3-8" class="pilcrow">¶</a></p>
-<p id="section-5.3-9">The Group ID of a catalog group is the catalog version number. The first
+<p id="section-5.3-10">Receivers <span class="bcp14">MUST</span> ignore any bytes following the fields defined in this
+document, to allow future extension.<a href="#section-5.3-10" class="pilcrow">¶</a></p>
+<p id="section-5.3-11">The Group ID of a catalog group is the catalog version number. The first
 version has Group ID 1, and each new version increments it by one, so the
 reference carried in every data group (see <a href="#groups" class="auto internal xref">Section 5.4</a>) stays small. The
 publisher <span class="bcp14">MUST</span> publish a catalog group before any data group that refers
-to it.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
-<p id="section-5.3-10">Metric Indices are scoped to a catalog version: a new catalog version <span class="bcp14">MAY</span>
+to it.<a href="#section-5.3-11" class="pilcrow">¶</a></p>
+<p id="section-5.3-12">Metric Indices are scoped to a catalog version: a new catalog version <span class="bcp14">MAY</span>
 assign indices differently. Publishers <span class="bcp14">SHOULD</span> keep indices stable across
 versions, which keeps Object ID filters valid (see <a href="#filtering" class="auto internal xref">Section 5.9</a>) and
-allows unchanged metric descriptions to be reused.<a href="#section-5.3-10" class="pilcrow">¶</a></p>
-<p id="section-5.3-11">Because each metric is described by its own object, a subscriber does not
+allows unchanged metric descriptions to be reused.<a href="#section-5.3-12" class="pilcrow">¶</a></p>
+<p id="section-5.3-13">Because each metric is described by its own object, a subscriber does not
 need the complete catalog before decoding data. It can decode the value
 in data Object ID N as soon as it has catalog Object ID N of the referenced
 version, and it can retrieve only the descriptions it needs by applying
-the same Object ID filter to the catalog track as to the data track.<a href="#section-5.3-11" class="pilcrow">¶</a></p>
-<p id="section-5.3-12">A subscriber <span class="bcp14">SHOULD</span> subscribe to the catalog track in parallel with the
+the same Object ID filter to the catalog track as to the data track.<a href="#section-5.3-13" class="pilcrow">¶</a></p>
+<p id="section-5.3-14">A subscriber <span class="bcp14">SHOULD</span> subscribe to the catalog track in parallel with the
 data tracks, using FILL_PARAMETERS selecting the current group
 (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.5" class="relref">Section 3.5</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>), and hold data objects until the referenced
 catalog objects are received. Catalog versions rarely change, so
 subscribers <span class="bcp14">MAY</span> cache them per Track Namespace and catalog version and
 use a cached version without waiting. A subscriber that receives a data
 group referring to a catalog version it does not have retrieves it with
-FETCH.<a href="#section-5.3-12" class="pilcrow">¶</a></p>
-<p id="section-5.3-13">The catalog track <span class="bcp14">MUST</span> use subgroup delivery and <span class="bcp14">SHOULD</span> carry the
-following Track Properties:<a href="#section-5.3-13" class="pilcrow">¶</a></p>
+FETCH.<a href="#section-5.3-14" class="pilcrow">¶</a></p>
+<p id="section-5.3-15">The catalog track <span class="bcp14">MUST</span> use subgroup delivery and <span class="bcp14">SHOULD</span> carry the
+following Track Properties:<a href="#section-5.3-15" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-14.1">
-            <p id="section-5.3-14.1.1">MAX_CACHE_DURATION no shorter than that of any data track of the
-resource, so that cached data remains interpretable.<a href="#section-5.3-14.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3-16.1">
+            <p id="section-5.3-16.1.1">MAX_CACHE_DURATION no shorter than that of any data track of the
+resource, so that cached data remains interpretable.<a href="#section-5.3-16.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-14.2">
-            <p id="section-5.3-14.2.1">DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
+          <li class="normal" id="section-5.3-16.2">
+            <p id="section-5.3-16.2.1">DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
 track of the resource, so that catalog objects arrive ahead of the data
-that depends on them.<a href="#section-5.3-14.2.1" class="pilcrow">¶</a></p>
+that depends on them.<a href="#section-5.3-16.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-14.3">
-            <p id="section-5.3-14.3.1">No OBJECT_DELIVERY_TIMEOUT.<a href="#section-5.3-14.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-16.3">
+            <p id="section-5.3-16.3.1">No OBJECT_DELIVERY_TIMEOUT.<a href="#section-5.3-16.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>

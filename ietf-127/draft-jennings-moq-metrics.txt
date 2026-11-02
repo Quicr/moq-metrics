@@ -340,8 +340,14 @@ Table of Contents
 
    *  Object ID 0 carries the catalog header.
 
-   *  Object ID N, for N > 0, describes the metric with Metric Index N,
-      whose value is carried as Object ID N in data groups.
+   *  Object ID N, for N > 0, carries the Metric Description of the
+      metric with Metric Index N.
+
+   The Metric Index of a metric is the Object ID of its Metric
+   Description in the catalog group, and is also the Object ID that
+   carries the metric's value in data groups (Section 5.4).  It is not
+   encoded in the Metric Description itself.  Metric Indices are unique
+   across all data tracks of the resource within a catalog version.
 
    The catalog header and metric description are encoded as follows,
    using the notation of Section 1.3 of [RFC9000] and the variable-
@@ -380,6 +386,12 @@ Table of Contents
 
                Figure 2: Metric Description (Object ID N > 0)
 
+   A Metric Description is the payload of catalog Object ID N, for N >
+   0.  A subscriber uses it to interpret the data objects with Object ID
+   N in any data group that refers to this catalog version: the Name and
+   Metric Type identify the metric, and the Value Representation
+   determines how the Metric Value is decoded.
+
    *  Metric Type: 0x0 for Gauge, 0x1 for Counter (see Section 4).
 
    *  Value Representation: The encoding of the metric value in data
@@ -389,7 +401,7 @@ Table of Contents
    *  Subgroup ID: The Subgroup ID carrying the metric in data groups
       (see Section 5.5).
 
-   *  Name: The metric name.
+   *  Name: The metric name, in ASCII (see Section 4).
 
    *  Unit: The unit of the value following [OTEL] conventions, or empty
       if not specified.
