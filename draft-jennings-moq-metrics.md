@@ -632,7 +632,8 @@ The following examples show decoded object payloads.
 
 One second later, only cpu_temperature is reported. Object 0 carries
 Prior Group ID Gap = 999, as Group IDs 1720367991001 to 1720367991999
-will never exist.
+will never exist, and Object 2 carries Prior Object ID Gap = 1, as
+Object 1 does not exist in this group.
 
 | Object | Structure    | Content                                   |
 |:------:|:-------------|:------------------------------------------|
