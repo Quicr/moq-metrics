@@ -79,11 +79,12 @@ Table of Contents
      5.9.  Filtering
      5.10. Retrieval of Past Metrics
      5.11. Examples
-   6.  IANA Considerations
-   7.  Security Considerations
-   8.  References
-     8.1.  Normative References
-     8.2.  Informative References
+   6.  Use with MSF
+   7.  IANA Considerations
+   8.  Security Considerations
+   9.  References
+     9.1.  Normative References
+     9.2.  Informative References
    Appendix A.  Changes from the ietf122 Version
    Acknowledgments
    Authors' Addresses
@@ -334,28 +335,73 @@ Table of Contents
 5.3.  Catalog Track
 
    The catalog track describes the resource and the metrics it
-   publishes.  It carries:
+   publishes.  Each group contains a single object (Object ID 0)
+   carrying the complete catalog as a JSON [RFC8259] object with the
+   following fields.  Parsers MUST ignore fields they do not understand.
 
-   1.  The resource attributes.
+       +============+========+======+==============================+
+       | Field      | Type   | Req. | Description                  |
+       +============+========+======+==============================+
+       | version    | String | Yes  | Catalog format version, "1"  |
+       +------------+--------+------+------------------------------+
+       | attributes | Object |  No  | Resource attributes as       |
+       |            |        |      | string key-value pairs       |
+       +------------+--------+------+------------------------------+
+       | tracks     | Object | Yes  | Maps each data track name to |
+       |            |        |      | an array of metric objects   |
+       +------------+--------+------+------------------------------+
 
-   2.  For each data track, the list of metrics, where each metric has a
-       Metric Index, name, value type (Gauge or Counter), and numeric
-       representation (integer or floating point).
+                          Table 2: Catalog fields
 
-   Each group in the catalog track contains a single object (Object ID
-   0) carrying the complete current catalog.  When the attributes or the
-   set of metrics change, the publisher publishes a new group with a
-   larger Group ID.  A subscriber obtains the current catalog by
-   subscribing to the catalog track with FILL_PARAMETERS selecting the
-   current group (Section 3.5 of [MOQT]).
+   +==========+========+======+========================================+
+   | Field    | Type   | Req. | Description                            |
+   +==========+========+======+========================================+
+   | index    | Number | Yes  | Metric Index, 1 or                     |
+   |          |        |      | greater; the Object ID of              |
+   |          |        |      | the metric in data groups              |
+   +----------+--------+------+----------------------------------------+
+   | name     | String | Yes  | Metric name                            |
+   +----------+--------+------+----------------------------------------+
+   | type     | String | Yes  | "gauge" or "counter"                   |
+   +----------+--------+------+----------------------------------------+
+   | repr     | String | Yes  | "int" or "float"                       |
+   +----------+--------+------+----------------------------------------+
+   | unit     | String |  No  | Unit of the value,                     |
+   |          |        |      | following [OTEL]                       |
+   |          |        |      | conventions                            |
+   +----------+--------+------+----------------------------------------+
+   | subgroup | Number |  No  | Subgroup ID carrying the               |
+   |          |        |      | metric; default 0                      |
+   +----------+--------+------+----------------------------------------+
+
+                       Table 3: Metric object fields
+
+   The Group ID of a catalog group is the time, in milliseconds since
+   the UNIX Epoch, from which that catalog applies.  A data group with
+   Group ID T is interpreted using the catalog group with the largest
+   Group ID not greater than T.  The publisher MUST publish a new
+   catalog group before publishing any data object that depends on it,
+   such as a new Metric Index or changed attributes.  A subscriber that
+   receives a data object with an unknown Metric Index SHOULD obtain the
+   latest catalog and MAY discard the object.
 
    A Metric Index, once assigned to a metric within a data track, MUST
    NOT be reassigned to a different metric for the lifetime of that
-   track.  New metrics are assigned new indices and metrics that are no
-   longer reported are simply no longer published.  Thus the most recent
-   catalog can be used to interpret any group of a data track, including
-   groups retrieved from relay caches via FETCH.  Metric Index 0 is
-   reserved.
+   track.  Metrics that are no longer reported are simply no longer
+   published.
+
+   A subscriber obtains the current catalog by subscribing to the
+   catalog track with FILL_PARAMETERS selecting the current group
+   (Section 3.5 of [MOQT]).  The catalog track MUST use subgroup
+   delivery and SHOULD carry the following Track Properties:
+
+   *  MAX_CACHE_DURATION no shorter than that of any data track of the
+      resource, so that cached data remains interpretable.
+
+   *  DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
+      track of the resource.
+
+   *  No OBJECT_DELIVERY_TIMEOUT.
 
 5.4.  Groups and Objects
 
@@ -541,11 +587,12 @@ Table of Contents
 
    Here is an example of the catalog object for a resource.
 
-   Catalog Track, Group 1, Object ID 0 { "attributes": [ { "location":
-   "us-east-2" }, { "os": "ubuntu20.4" } ], "tracks": { "4": [ {
-   "index": 1, "name": "cpu_usage_percentage", "type": "gauge", "repr":
-   "int" }, { "index": 2, "name": "cpu_temperature", "type": "gauge",
-   "repr": "float" } ] } }
+   Catalog Track, Group 1720367990000, Object ID 0 { "version": "1",
+   "attributes": { "location": "us-east-2", "os": "ubuntu20.4" },
+   "tracks": { "4": [ { "index": 1, "name": "cpu_usage_percentage",
+   "type": "gauge", "repr": "int", "unit": "%" }, { "index": 2, "name":
+   "cpu_temperature", "type": "gauge", "repr": "float", "unit": "Cel" }
+   ] } }
 
    Here is an example of a group in the Warning track showing the
    capture timestamp, cpu_usage_percentage and cpu_temperature metric
@@ -571,11 +618,29 @@ Table of Contents
    See Section 4 for details on data types representations for capture
    timestamp, attributes, metric names and values.
 
-6.  IANA Considerations
+6.  Use with MSF
+
+   An MOQT Streaming Format (MSF) [MSF] catalog can direct a client to
+   publish metrics using a publishTracks entry with a packaging of
+   "moqmetrics" and a role of "metrics".  In such an entry:
+
+   *  namespace is the Track Namespace of Section 5.1 rendered using
+      Section 8.8 of [MOQT], with %resourceId% as a placeholder for the
+      client's ResourceID: metrics.2emoq.2earpa-v1-%resourceId%.
+
+   *  name is the data track for a granularity level (Section 5.2).  A
+      catalog can include one entry per level it wants the client to
+      publish.
+
+   A client publishing any data track in this way also publishes the
+   catalog track (Section 5.3) in the same namespace.  The connectionUri
+   and token of the entry apply to the catalog track as well.
+
+7.  IANA Considerations
 
    This document has no IANA actions.
 
-7.  Security Considerations
+8.  Security Considerations
 
    The ResourceID, when derived from a MAC address, can reveal that
    address (see Section 4.1).  Resource attributes and metric values are
@@ -583,9 +648,9 @@ Table of Contents
    Names, Group IDs (capture times) and Track Properties are visible to
    relays.  The security considerations of [MOQT] apply.
 
-8.  References
+9.  References
 
-8.1.  Normative References
+9.1.  Normative References
 
    [MOQT]     Nandakumar, S., Vasiliev, V., Swett, I., and A. Frindell,
               "Media over QUIC Transport", Work in Progress, Internet-
@@ -602,16 +667,21 @@ Table of Contents
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
-8.2.  Informative References
-
-   [OTEL]     OpenTelemetry, "OpenTelemetry Metrics Data Model", n.d.,
-              <https://opentelemetry.io/docs/specs/otel/metrics/data-
-              model/>.
-
    [RFC8259]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
               Interchange Format", STD 90, RFC 8259,
               DOI 10.17487/RFC8259, December 2017,
               <https://www.rfc-editor.org/rfc/rfc8259>.
+
+9.2.  Informative References
+
+   [MSF]      Law, W. and S. Nandakumar, "MOQT Streaming Format", Work
+              in Progress, Internet-Draft, draft-ietf-moq-msf-01, 2 June
+              2026, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              moq-msf-01>.
+
+   [OTEL]     OpenTelemetry, "OpenTelemetry Metrics Data Model", n.d.,
+              <https://opentelemetry.io/docs/specs/otel/metrics/data-
+              model/>.
 
 Appendix A.  Changes from the ietf122 Version
 
@@ -632,6 +702,8 @@ Appendix A.  Changes from the ietf122 Version
       Track Properties for priority, group order, caching and delivery
       timeouts, SUBSCRIBE_NAMESPACE for discovery, range filters for
       metric selection, and FETCH and fill for time range retrieval.
+
+   *  Specified the catalog format and added use with MSF.
 
    *  Added an Architecture Overview describing metrics sharing a
       session with media, and metrics as the primary data.
