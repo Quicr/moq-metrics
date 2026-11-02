@@ -688,24 +688,6 @@ following time series ({{model}}), with capture times in UTC on 7 July
 | 15:59:52.000004211 | cpu_temperature      |  44.8 | Cel  |
 {: title="Decoded time series"}
 
-### Encoding {#example-encoding}
-
-The payloads of Objects 0, 1 and 2 of Group 1720367991000 are encoded as
-follows:
-
-~~~
-Object 0 (Capture Info), 4 bytes
-  c1 e2 40                   Capture Timestamp Offset = 123456 (vi64)
-  01                         Catalog Version = 1 (vi64)
-
-Object 1 (Metric Value, unsigned), 1 byte
-  63                         99 (vi64)
-
-Object 2 (Metric Value, float), 8 bytes
-  40 46 8c cc cc cc cc cd    45.1 (IEEE 754 binary64)
-~~~
-{: title="Encoded payload example"}
-
 # Use with MSF {#msf}
 
 An MOQT Streaming Format (MSF) {{?MSF=I-D.ietf-moq-msf}} catalog can
