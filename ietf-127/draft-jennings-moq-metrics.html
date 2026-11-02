@@ -1586,136 +1586,112 @@ the objects of data groups:<a href="#section-5.3-1" class="pilcrow">¶</a></p>
 value is carried as Object ID N in data groups.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.3-3">Each object carries a JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> object with the fields below.
-Parsers <span class="bcp14">MUST</span> ignore fields they do not understand.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
-<span id="name-catalog-header-fields-objec"></span><table class="center" id="table-2">
-          <caption>
-<a href="#table-2" class="selfRef">Table 2</a>:
-<a href="#name-catalog-header-fields-objec" class="selfRef">Catalog header fields (Object ID 0)</a>
-          </caption>
-<thead>
-            <tr>
-              <th class="text-left" rowspan="1" colspan="1">Field</th>
-              <th class="text-left" rowspan="1" colspan="1">Type</th>
-              <th class="text-center" rowspan="1" colspan="1">Req.</th>
-              <th class="text-left" rowspan="1" colspan="1">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>version</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">String</td>
-              <td class="text-center" rowspan="1" colspan="1">Yes</td>
-              <td class="text-left" rowspan="1" colspan="1">Catalog format version, <code>"1"</code>
-</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>attributes</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">Object</td>
-              <td class="text-center" rowspan="1" colspan="1">No</td>
-              <td class="text-left" rowspan="1" colspan="1">Resource attributes as string key-value pairs</td>
-            </tr>
-          </tbody>
-        </table>
-<span id="name-metric-description-fields-o"></span><table class="center" id="table-3">
-          <caption>
-<a href="#table-3" class="selfRef">Table 3</a>:
-<a href="#name-metric-description-fields-o" class="selfRef">Metric description fields (Object ID N &gt; 0)</a>
-          </caption>
-<thead>
-            <tr>
-              <th class="text-left" rowspan="1" colspan="1">Field</th>
-              <th class="text-left" rowspan="1" colspan="1">Type</th>
-              <th class="text-center" rowspan="1" colspan="1">Req.</th>
-              <th class="text-left" rowspan="1" colspan="1">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>name</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">String</td>
-              <td class="text-center" rowspan="1" colspan="1">Yes</td>
-              <td class="text-left" rowspan="1" colspan="1">Metric name</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>type</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">String</td>
-              <td class="text-center" rowspan="1" colspan="1">Yes</td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>"gauge"</code> or <code>"counter"</code>
-</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>repr</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">String</td>
-              <td class="text-center" rowspan="1" colspan="1">Yes</td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>"int"</code> or <code>"float"</code>
-</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>unit</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">String</td>
-              <td class="text-center" rowspan="1" colspan="1">No</td>
-              <td class="text-left" rowspan="1" colspan="1">Unit of the value, following <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> conventions</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>subgroup</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">Number</td>
-              <td class="text-center" rowspan="1" colspan="1">No</td>
-              <td class="text-left" rowspan="1" colspan="1">Subgroup ID carrying the metric; default 0</td>
-            </tr>
-          </tbody>
-        </table>
-<p id="section-5.3-6">The Group ID of a catalog group is the time, in milliseconds since the
+<p id="section-5.3-3">The catalog header and metric description are encoded as follows, using
+the notation of <span><a href="https://rfc-editor.org/rfc/rfc9000#section-1.3" class="relref">Section 1.3</a> of [<a href="#RFC9000" class="cite xref">RFC9000</a>]</span> and the variable-length
+integer (vi64) and Key-Value-Pair conventions of <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8" class="relref">Section 8</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<span id="name-catalog-header-object-id-0"></span><figure id="figure-1">
+          <div class="alignLeft art-text artwork" id="section-5.3-4.1">
+<pre>
+Catalog Header {
+  Version (vi64),
+  Number of Attributes (vi64),
+  Attribute (..) ...,
+}
+
+Attribute {
+  Key Length (vi64),
+  Key (..),
+  Value Length (vi64),
+  Value (..),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
+<a href="#name-catalog-header-object-id-0" class="selfRef">Catalog Header (Object ID 0)</a>
+          </figcaption></figure>
+<ul class="normal">
+<li class="normal" id="section-5.3-5.1">
+            <p id="section-5.3-5.1.1">Version: The catalog format version. This document defines version 1.<a href="#section-5.3-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-5.2">
+            <p id="section-5.3-5.2.1">Attribute: A resource attribute, where Key and Value are UTF-8 strings.<a href="#section-5.3-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<span id="name-metric-description-object-i"></span><figure id="figure-2">
+          <div class="alignLeft art-text artwork" id="section-5.3-6.1">
+<pre>
+Metric Description {
+  Metric Type (vi64),
+  Value Representation (vi64),
+  Subgroup ID (vi64),
+  Name Length (vi64),
+  Name (..),
+  Unit Length (vi64),
+  Unit (..),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-metric-description-object-i" class="selfRef">Metric Description (Object ID N &gt; 0)</a>
+          </figcaption></figure>
+<ul class="normal">
+<li class="normal" id="section-5.3-7.1">
+            <p id="section-5.3-7.1.1">Metric Type: 0x0 for Gauge, 0x1 for Counter (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-7.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-7.2">
+            <p id="section-5.3-7.2.1">Value Representation: The encoding of the metric value in data objects
+(see <a href="#groups" class="auto internal xref">Section 5.4</a>): 0x0 for an unsigned integer, 0x1 for a signed
+integer, 0x2 for a floating point number.<a href="#section-5.3-7.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-7.3">
+            <p id="section-5.3-7.3.1">Subgroup ID: The Subgroup ID carrying the metric in data groups
+(see <a href="#subgroups" class="auto internal xref">Section 5.5</a>).<a href="#section-5.3-7.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-7.4">
+            <p id="section-5.3-7.4.1">Name: The metric name.<a href="#section-5.3-7.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.3-7.5">
+            <p id="section-5.3-7.5.1">Unit: The unit of the value following <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> conventions, or empty
+if not specified.<a href="#section-5.3-7.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.3-8">Receivers <span class="bcp14">MUST</span> ignore any bytes following the fields defined in this
+document, to allow future extension.<a href="#section-5.3-8" class="pilcrow">¶</a></p>
+<p id="section-5.3-9">The Group ID of a catalog group is the time, in milliseconds since the
 UNIX Epoch, from which that catalog version applies. Each data group
 identifies the catalog version it uses (see <a href="#groups" class="auto internal xref">Section 5.4</a>). The publisher
-<span class="bcp14">MUST</span> publish a catalog group before any data group that refers to it.<a href="#section-5.3-6" class="pilcrow">¶</a></p>
-<p id="section-5.3-7">Metric Indices are scoped to a catalog version: a new catalog version <span class="bcp14">MAY</span>
+<span class="bcp14">MUST</span> publish a catalog group before any data group that refers to it.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
+<p id="section-5.3-10">Metric Indices are scoped to a catalog version: a new catalog version <span class="bcp14">MAY</span>
 assign indices differently. Publishers <span class="bcp14">SHOULD</span> keep indices stable across
 versions, which keeps Object ID filters valid (see <a href="#filtering" class="auto internal xref">Section 5.9</a>) and
-allows unchanged metric descriptions to be reused.<a href="#section-5.3-7" class="pilcrow">¶</a></p>
-<p id="section-5.3-8">Because each metric is described by its own object, a subscriber does not
+allows unchanged metric descriptions to be reused.<a href="#section-5.3-10" class="pilcrow">¶</a></p>
+<p id="section-5.3-11">Because each metric is described by its own object, a subscriber does not
 need the complete catalog before decoding data. It can decode the value
 in data Object ID N as soon as it has catalog Object ID N of the referenced
 version, and it can retrieve only the descriptions it needs by applying
-the same Object ID filter to the catalog track as to the data track.<a href="#section-5.3-8" class="pilcrow">¶</a></p>
-<p id="section-5.3-9">A subscriber <span class="bcp14">SHOULD</span> subscribe to the catalog track in parallel with the
+the same Object ID filter to the catalog track as to the data track.<a href="#section-5.3-11" class="pilcrow">¶</a></p>
+<p id="section-5.3-12">A subscriber <span class="bcp14">SHOULD</span> subscribe to the catalog track in parallel with the
 data tracks, using FILL_PARAMETERS selecting the current group
 (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.5" class="relref">Section 3.5</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>), and hold data objects until the referenced
 catalog objects are received. Catalog versions rarely change, so
 subscribers <span class="bcp14">MAY</span> cache them per Track Namespace and catalog Group ID and
 use a cached version without waiting. A subscriber that receives a data
 group referring to a catalog version it does not have retrieves it with
-FETCH.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
-<p id="section-5.3-10">The catalog track <span class="bcp14">MUST</span> use subgroup delivery and <span class="bcp14">SHOULD</span> carry the
-following Track Properties:<a href="#section-5.3-10" class="pilcrow">¶</a></p>
+FETCH.<a href="#section-5.3-12" class="pilcrow">¶</a></p>
+<p id="section-5.3-13">The catalog track <span class="bcp14">MUST</span> use subgroup delivery and <span class="bcp14">SHOULD</span> carry the
+following Track Properties:<a href="#section-5.3-13" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-11.1">
-            <p id="section-5.3-11.1.1">MAX_CACHE_DURATION no shorter than that of any data track of the
-resource, so that cached data remains interpretable.<a href="#section-5.3-11.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3-14.1">
+            <p id="section-5.3-14.1.1">MAX_CACHE_DURATION no shorter than that of any data track of the
+resource, so that cached data remains interpretable.<a href="#section-5.3-14.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-11.2">
-            <p id="section-5.3-11.2.1">DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
+          <li class="normal" id="section-5.3-14.2">
+            <p id="section-5.3-14.2.1">DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
 track of the resource, so that catalog objects arrive ahead of the data
-that depends on them.<a href="#section-5.3-11.2.1" class="pilcrow">¶</a></p>
+that depends on them.<a href="#section-5.3-14.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-11.3">
-            <p id="section-5.3-11.3.1">No OBJECT_DELIVERY_TIMEOUT.<a href="#section-5.3-11.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-14.3">
+            <p id="section-5.3-14.3.1">No OBJECT_DELIVERY_TIMEOUT.<a href="#section-5.3-14.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -1736,62 +1712,67 @@ objects in that group and the catalog version it refers to. Objects
 within a group are:<a href="#section-5.4-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.4-3.1">
-            <p id="section-5.4-3.1.1">Object ID 0 is <span class="bcp14">REQUIRED</span> and carries a JSON object with the fields
-below.<a href="#section-5.4-3.1.1" class="pilcrow">¶</a></p>
+            <p id="section-5.4-3.1.1">Object ID 0 is <span class="bcp14">REQUIRED</span> and carries the Capture Info.<a href="#section-5.4-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.4-3.2">
-            <p id="section-5.4-3.2.1">Object ID N, for N &gt; 0, carries the value of the metric with Metric
-Index N in the referenced catalog version, observed at the capture time.<a href="#section-5.4-3.2.1" class="pilcrow">¶</a></p>
+            <p id="section-5.4-3.2.1">Object ID N, for N &gt; 0, carries the Metric Value of the metric with
+Metric Index N in the referenced catalog version, observed at the
+capture time.<a href="#section-5.4-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<span id="name-data-object-0-fields"></span><table class="center" id="table-4">
-          <caption>
-<a href="#table-4" class="selfRef">Table 4</a>:
-<a href="#name-data-object-0-fields" class="selfRef">Data Object 0 fields</a>
-          </caption>
-<thead>
-            <tr>
-              <th class="text-left" rowspan="1" colspan="1">Field</th>
-              <th class="text-left" rowspan="1" colspan="1">Type</th>
-              <th class="text-center" rowspan="1" colspan="1">Req.</th>
-              <th class="text-left" rowspan="1" colspan="1">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>capture_timestamp</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">Number</td>
-              <td class="text-center" rowspan="1" colspan="1">Yes</td>
-              <td class="text-left" rowspan="1" colspan="1">Capture time in nanoseconds since the UNIX Epoch</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>catalog</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">Number</td>
-              <td class="text-center" rowspan="1" colspan="1">Yes</td>
-              <td class="text-left" rowspan="1" colspan="1">Group ID of the catalog version used by this group</td>
-            </tr>
-          </tbody>
-        </table>
-<p id="section-5.4-5">A resource that does not report a given metric at a capture time simply
+<span id="name-capture-info-object-id-0"></span><figure id="figure-3">
+          <div class="alignLeft art-text artwork" id="section-5.4-4.1">
+<pre>
+Capture Info {
+  Capture Timestamp Offset (vi64),
+  Catalog Group ID (vi64),
+}
+</pre>
+</div>
+<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
+<a href="#name-capture-info-object-id-0" class="selfRef">Capture Info (Object ID 0)</a>
+          </figcaption></figure>
+<ul class="normal">
+<li class="normal" id="section-5.4-5.1">
+            <p id="section-5.4-5.1.1">Capture Timestamp Offset: The nanoseconds to add to the Group ID, in
+milliseconds, to obtain the precise capture time. The value is less
+than 1000000.<a href="#section-5.4-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-5.2">
+            <p id="section-5.4-5.2.1">Catalog Group ID: The Group ID of the catalog version used by this
+group.<a href="#section-5.4-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.4-6">The Metric Value is the entire object payload, encoded according to the
+Value Representation of the metric:<a href="#section-5.4-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.4-7.1">
+            <p id="section-5.4-7.1.1">Unsigned integer: a vi64.<a href="#section-5.4-7.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-7.2">
+            <p id="section-5.4-7.2.1">Signed integer: a 64-bit two's complement integer in network byte
+order.<a href="#section-5.4-7.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-7.3">
+            <p id="section-5.4-7.3.1">Floating point: an IEEE 754 binary64 value in network byte order.<a href="#section-5.4-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.4-8">A resource that does not report a given metric at a capture time simply
 omits that object.
 A subscriber or relay cannot infer anything from a missing Object ID
 (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-2.1.2" class="relref">Section 2.1.2</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>); a publisher <span class="bcp14">MAY</span> use the
 Prior Object ID Gap Object Property to signal that skipped Object IDs do
-not exist.<a href="#section-5.4-5" class="pilcrow">¶</a></p>
-<p id="section-5.4-6">Resources typically do not capture metrics every millisecond, so Group IDs
+not exist.<a href="#section-5.4-8" class="pilcrow">¶</a></p>
+<p id="section-5.4-9">Resources typically do not capture metrics every millisecond, so Group IDs
 in a data track are sparse. The publisher <span class="bcp14">SHOULD</span> include the Prior Group ID
 Gap Object Property (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-10.8" class="relref">Section 10.8</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) on the
 first object of each subgroup, set to the number of milliseconds since the
 previous capture minus one. This allows relays and fetches to know that
 the intervening groups will never exist, rather than leaving them in the
-unknown state.<a href="#section-5.4-6" class="pilcrow">¶</a></p>
-<p id="section-5.4-7">Below is a conceptual representation of the MOQT mapping for the Warning
-(4) track of a resource.<a href="#section-5.4-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-ascii-art art-text artwork" id="section-5.4-8">
+unknown state.<a href="#section-5.4-9" class="pilcrow">¶</a></p>
+<p id="section-5.4-10">Below is a conceptual representation of the MOQT mapping for the Warning
+(4) track of a resource.<a href="#section-5.4-10" class="pilcrow">¶</a></p>
+<div class="alignLeft art-ascii-art art-text artwork" id="section-5.4-11">
 <pre>
 Track: ("metrics.moq.arpa","v1",&lt;resourceID&gt;) / "4"
 
@@ -1814,7 +1795,7 @@ Track: ("metrics.moq.arpa","v1",&lt;resourceID&gt;) / "4"
     |   metric index N)      |          |   metric index N)      |
     +------------------------+          +------------------------+
 
-</pre><a href="#section-5.4-8" class="pilcrow">¶</a>
+</pre><a href="#section-5.4-11" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -1975,58 +1956,102 @@ windows of interest, for example around an alert.<a href="#section-5.10-3" class
         <h3 id="name-examples">
 <a href="#section-5.11" class="section-number selfRef">5.11. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
         </h3>
-<p id="section-5.11-1">The following examples represent object payloads in JSON format <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span>.<a href="#section-5.11-1" class="pilcrow">¶</a></p>
-<p id="section-5.11-2">Here is an example of a catalog version for a resource.<a href="#section-5.11-2" class="pilcrow">¶</a></p>
-<p id="section-5.11-3">```
-Catalog Track, Group 1720367990000, Object ID 0
-{
-  "version": "1",
-  "attributes": { "location": "us-east-2", "os": "ubuntu20.4" }
-}<a href="#section-5.11-3" class="pilcrow">¶</a></p>
-<p id="section-5.11-4">Catalog Track, Group 1720367990000, Object ID 1
-{
-  "name": "cpu_usage_percentage",
-  "type": "gauge", "repr": "int", "unit": "%"
-}<a href="#section-5.11-4" class="pilcrow">¶</a></p>
-<p id="section-5.11-5">Catalog Track, Group 1720367990000, Object ID 2
-{
-  "name": "cpu_temperature",
-  "type": "gauge", "repr": "float", "unit": "Cel"
-}
-```<a href="#section-5.11-5" class="pilcrow">¶</a></p>
-<p id="section-5.11-6">Here is an example of a group in the Warning track showing the capture
-timestamp, cpu_usage_percentage and cpu_temperature metric values.<a href="#section-5.11-6" class="pilcrow">¶</a></p>
-<p id="section-5.11-7">```
-Track 4, Group 1720367991000, Object ID 0
-{
-  "capture_timestamp": 1720367991000123456,
-  "catalog": 1720367990000
-}<a href="#section-5.11-7" class="pilcrow">¶</a></p>
-<p id="section-5.11-8">Track 4, Group 1720367991000, Object ID 1
-{
-  "value": 99
-}<a href="#section-5.11-8" class="pilcrow">¶</a></p>
-<p id="section-5.11-9">Track 4, Group 1720367991000, Object ID 2
-{
-  "value": 45.1
-}
-```<a href="#section-5.11-9" class="pilcrow">¶</a></p>
-<p id="section-5.11-10">Below is a subsequent group captured one second later in which only
-cpu_temperature is reported. The first object carries Prior Group ID Gap
-= 999, as Group IDs 1720367991001 to 1720367991999 will never exist.<a href="#section-5.11-10" class="pilcrow">¶</a></p>
-<p id="section-5.11-11">```
-Track 4, Group 1720367992000, Object ID 0
-{
-  "capture_timestamp": 1720367992000004211,
-  "catalog": 1720367990000
-}<a href="#section-5.11-11" class="pilcrow">¶</a></p>
-<p id="section-5.11-12">Track 4, Group 1720367992000, Object ID 2
-{
-  "value": 44.8
-}
-```<a href="#section-5.11-12" class="pilcrow">¶</a></p>
-<p id="section-5.11-13">See <a href="#model" class="auto internal xref">Section 4</a> for details on data types representations for capture
-timestamp, attributes, metric names and values.<a href="#section-5.11-13" class="pilcrow">¶</a></p>
+<p id="section-5.11-1">The following examples show decoded object payloads.<a href="#section-5.11-1" class="pilcrow">¶</a></p>
+<span id="name-catalog-track-group-1720367"></span><table class="center" id="table-2">
+          <caption>
+<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#name-catalog-track-group-1720367" class="selfRef">Catalog track, Group 1720367990000</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">Object</th>
+              <th class="text-left" rowspan="1" colspan="1">Structure</th>
+              <th class="text-left" rowspan="1" colspan="1">Content</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">0</td>
+              <td class="text-left" rowspan="1" colspan="1">Catalog Header</td>
+              <td class="text-left" rowspan="1" colspan="1">Version 1; location = us-east-2, os = ubuntu20.4</td>
+            </tr>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">Metric Description</td>
+              <td class="text-left" rowspan="1" colspan="1">cpu_usage_percentage; Gauge; unsigned; unit %</td>
+            </tr>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">Metric Description</td>
+              <td class="text-left" rowspan="1" colspan="1">cpu_temperature; Gauge; floating point; unit Cel</td>
+            </tr>
+          </tbody>
+        </table>
+<span id="name-warning-track-group-1720367"></span><table class="center" id="table-3">
+          <caption>
+<a href="#table-3" class="selfRef">Table 3</a>:
+<a href="#name-warning-track-group-1720367" class="selfRef">Warning track, Group 1720367991000</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">Object</th>
+              <th class="text-left" rowspan="1" colspan="1">Structure</th>
+              <th class="text-left" rowspan="1" colspan="1">Content</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">0</td>
+              <td class="text-left" rowspan="1" colspan="1">Capture Info</td>
+              <td class="text-left" rowspan="1" colspan="1">Offset 123456 ns; Catalog Group ID 1720367990000</td>
+            </tr>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">1</td>
+              <td class="text-left" rowspan="1" colspan="1">Metric Value</td>
+              <td class="text-left" rowspan="1" colspan="1">99 (cpu_usage_percentage)</td>
+            </tr>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">Metric Value</td>
+              <td class="text-left" rowspan="1" colspan="1">45.1 (cpu_temperature)</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-5.11-4">One second later, only cpu_temperature is reported. Object 0 carries
+Prior Group ID Gap = 999, as Group IDs 1720367991001 to 1720367991999
+will never exist.<a href="#section-5.11-4" class="pilcrow">¶</a></p>
+<span id="name-warning-track-group-17203679"></span><table class="center" id="table-4">
+          <caption>
+<a href="#table-4" class="selfRef">Table 4</a>:
+<a href="#name-warning-track-group-17203679" class="selfRef">Warning track, Group 1720367992000</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-center" rowspan="1" colspan="1">Object</th>
+              <th class="text-left" rowspan="1" colspan="1">Structure</th>
+              <th class="text-left" rowspan="1" colspan="1">Content</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">0</td>
+              <td class="text-left" rowspan="1" colspan="1">Capture Info</td>
+              <td class="text-left" rowspan="1" colspan="1">Offset 4211 ns; Catalog Group ID 1720367990000</td>
+            </tr>
+            <tr>
+              <td class="text-center" rowspan="1" colspan="1">2</td>
+              <td class="text-left" rowspan="1" colspan="1">Metric Value</td>
+              <td class="text-left" rowspan="1" colspan="1">44.8 (cpu_temperature)</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-5.11-6">The Capture Info of Group 1720367991000 is encoded in 9 bytes:<a href="#section-5.11-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-5.11-7">
+<pre>
+c1 e2 40                  Capture Timestamp Offset = 123456 (vi64)
+f9 90 8d ec 44 f0         Catalog Group ID = 1720367990000 (vi64)
+</pre><a href="#section-5.11-7" class="pilcrow">¶</a>
+</div>
 </section>
 </div>
 </section>
@@ -2100,9 +2125,9 @@ security considerations of <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</s
         <dd>
 <span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="RFC8259">[RFC8259]</dt>
+<dt id="RFC9000">[RFC9000]</dt>
       <dd>
-<span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12" class="refDate">December 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8259">https://www.rfc-editor.org/rfc/rfc8259</a>&gt;</span>. </dd>
+<span class="refAuthor">Iyengar, J., Ed.</span> and <span class="refAuthor">M. Thomson, Ed.</span>, <span class="refTitle">"QUIC: A UDP-Based Multiplexed and Secure Transport"</span>, <span class="seriesInfo">RFC 9000</span>, <span class="seriesInfo">DOI 10.17487/RFC9000</span>, <time datetime="2021-05" class="refDate">May 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9000">https://www.rfc-editor.org/rfc/rfc9000</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -2160,8 +2185,11 @@ and FETCH and fill for time range retrieval.<a href="#appendix-A-1.5.1" class="p
           <p id="appendix-A-1.6.1">Specified the catalog format and added use with MSF.<a href="#appendix-A-1.6.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-1.7">
-          <p id="appendix-A-1.7.1">Added an Architecture Overview describing metrics sharing a session
-with media, and metrics as the primary data.<a href="#appendix-A-1.7.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-1.7.1">Object payloads use a binary encoding following the MOQT notation.<a href="#appendix-A-1.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.8">
+          <p id="appendix-A-1.8.1">Added an Architecture Overview describing metrics sharing a session
+with media, and metrics as the primary data.<a href="#appendix-A-1.8.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
