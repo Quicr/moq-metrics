@@ -291,50 +291,66 @@ however, consume high bandwidth when published.
 ## Catalog Track {#catalog}
 
 The catalog track describes the resource and the metrics it publishes.
-Each group contains a single object (Object ID 0) carrying the complete
-catalog as a JSON {{!RFC8259}} object with the following fields. Parsers
-MUST ignore fields they do not understand.
+Each catalog group is one version of the catalog, and its objects mirror
+the objects of data groups:
+
+* Object ID 0 carries the catalog header.
+
+* Object ID N, for N > 0, describes the metric with Metric Index N, whose
+  value is carried as Object ID N in data groups.
+
+Each object carries a JSON {{!RFC8259}} object with the fields below.
+Parsers MUST ignore fields they do not understand.
 
 | Field        | Type   | Req. | Description                                  |
 |:-------------|:-------|:----:|:---------------------------------------------|
 | `version`    | String | Yes  | Catalog format version, `"1"`                |
 | `attributes` | Object | No   | Resource attributes as string key-value pairs |
-| `tracks`     | Object | Yes  | Maps each data track name to an array of metric objects |
-{: title="Catalog fields"}
+{: title="Catalog header fields (Object ID 0)"}
 
 | Field      | Type   | Req. | Description                                  |
 |:-----------|:-------|:----:|:---------------------------------------------|
-| `index`    | Number | Yes  | Metric Index, 1 or greater; the Object ID of the metric in data groups |
 | `name`     | String | Yes  | Metric name                                  |
 | `type`     | String | Yes  | `"gauge"` or `"counter"`                     |
 | `repr`     | String | Yes  | `"int"` or `"float"`                         |
 | `unit`     | String | No   | Unit of the value, following {{OTEL}} conventions |
 | `subgroup` | Number | No   | Subgroup ID carrying the metric; default 0   |
-{: title="Metric object fields"}
+{: title="Metric description fields (Object ID N > 0)"}
 
 The Group ID of a catalog group is the time, in milliseconds since the
-UNIX Epoch, from which that catalog applies. A data group with Group ID T
-is interpreted using the catalog group with the largest Group ID not
-greater than T. The publisher MUST publish a new catalog group before
-publishing any data object that depends on it, such as a new Metric Index
-or changed attributes. A subscriber that receives a data object with an
-unknown Metric Index SHOULD obtain the latest catalog and MAY discard the
-object.
+UNIX Epoch, from which that catalog version applies. Each data group
+identifies the catalog version it uses (see {{groups}}). The publisher
+MUST publish a catalog group before any data group that refers to it.
 
-A Metric Index, once assigned to a metric within a data track, MUST NOT be
-reassigned to a different metric for the lifetime of that track. Metrics
-that are no longer reported are simply no longer published.
+Metric Indices are scoped to a catalog version: a new catalog version MAY
+assign indices differently. Publishers SHOULD keep indices stable across
+versions, which keeps Object ID filters valid (see {{filtering}}) and
+allows unchanged metric descriptions to be reused.
 
-A subscriber obtains the current catalog by subscribing to the catalog
-track with FILL_PARAMETERS selecting the current group
-({{Section 3.5 of MOQT}}). The catalog track MUST use subgroup delivery
-and SHOULD carry the following Track Properties:
+Because each metric is described by its own object, a subscriber does not
+need the complete catalog before decoding data. It can decode the value
+in data Object ID N as soon as it has catalog Object ID N of the referenced
+version, and it can retrieve only the descriptions it needs by applying
+the same Object ID filter to the catalog track as to the data track.
+
+A subscriber SHOULD subscribe to the catalog track in parallel with the
+data tracks, using FILL_PARAMETERS selecting the current group
+({{Section 3.5 of MOQT}}), and hold data objects until the referenced
+catalog objects are received. Catalog versions rarely change, so
+subscribers MAY cache them per Track Namespace and catalog Group ID and
+use a cached version without waiting. A subscriber that receives a data
+group referring to a catalog version it does not have retrieves it with
+FETCH.
+
+The catalog track MUST use subgroup delivery and SHOULD carry the
+following Track Properties:
 
 * MAX_CACHE_DURATION no shorter than that of any data track of the
   resource, so that cached data remains interpretable.
 
 * DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
-  track of the resource.
+  track of the resource, so that catalog objects arrive ahead of the data
+  that depends on them.
 
 * No OBJECT_DELIVERY_TIMEOUT.
 
@@ -348,17 +364,23 @@ satisfies the requirement that Group IDs increase with time
 express time ranges directly as Location filters (see {{retrieval}}).
 
 Each group is independently useful: decoding a group requires only the
-objects in that group and the catalog. Objects within a group are:
+objects in that group and the catalog version it refers to. Objects
+within a group are:
 
-* Object ID 0 carries the capture timestamp in nanoseconds since the
-  UNIX Epoch. This object is OPTIONAL and MAY be omitted when millisecond
-  precision, as given by the Group ID, is sufficient.
+* Object ID 0 is REQUIRED and carries a JSON object with the fields
+  below.
 
-* Object ID N, for N > 0, carries the value of the metric whose Metric
-  Index in the catalog is N, observed at the capture time.
+* Object ID N, for N > 0, carries the value of the metric with Metric
+  Index N in the referenced catalog version, observed at the capture time.
 
-Because Object IDs identify metrics stably across groups, a resource that
-does not report a given metric at a capture time simply omits that object.
+| Field               | Type   | Req. | Description                           |
+|:--------------------|:-------|:----:|:--------------------------------------|
+| `capture_timestamp` | Number | Yes  | Capture time in nanoseconds since the UNIX Epoch |
+| `catalog`           | Number | Yes  | Group ID of the catalog version used by this group |
+{: title="Data Object 0 fields"}
+
+A resource that does not report a given metric at a capture time simply
+omits that object.
 A subscriber or relay cannot infer anything from a missing Object ID
 ({{Section 2.1.2 of MOQT}}); a publisher MAY use the
 Prior Object ID Gap Object Property to signal that skipped Object IDs do
@@ -385,7 +407,7 @@ Track: ("metrics.moq.arpa","v1",<resourceID>) / "4"
     Subgroup 0                           Subgroup 0
     +------------------------+          +------------------------+
     | Object 0 (Capture      |          | Object 0 (Capture      |
-    |   Timestamp in ns)     |          |   Timestamp in ns)     |
+    |   Timestamp, Catalog)  |          |   Timestamp, Catalog)  |
     +------------------------+          +------------------------+
     +------------------------+          +------------------------+
     | Object 1 (value of     |          | Object 1 (value of     |
@@ -413,7 +435,8 @@ across groups, so that subscribers can select them using a Subgroup ID
 range filter. Since every metric object is independent of the others in
 its group, loss of a subgroup does not prevent use of the others; objects
 in subgroups other than the one carrying Object ID 0 use the Group ID as
-their capture time.
+their capture time, and the latest catalog version not later than the
+Group ID.
 
 For levels where losing a sample is preferable to delaying it, such as
 Debug, publishers MAY send objects using the Datagram delivery mode.
@@ -472,9 +495,11 @@ in SUBSCRIBE, FETCH or FILL_PARAMETERS allow a collector to further reduce
 the data delivered within a track:
 
 * An Object ID range filter selects specific metrics by Metric Index.
-  Including Object ID 0 in the range also delivers the precise capture
-  timestamp. For example, ranges `[0, 0]` and `[3, 5]` deliver the capture
-  timestamp and the metrics with indices 3 to 5.
+  The filter SHOULD include Object ID 0. For example, ranges `[0, 0]` and
+  `[3, 5]` deliver Object 0 and the metrics with indices 3 to 5. The same
+  filter applied to the catalog track delivers only the catalog header
+  and the descriptions of those metrics. A subscriber updates its filters
+  when a new catalog version assigns indices differently.
 
 * A Subgroup ID or Publisher Priority range filter selects the metrics
   that the publisher consistently places in particular subgroups
@@ -519,21 +544,25 @@ windows of interest, for example around an alert.
 
 The following examples represent object payloads in JSON format {{?RFC8259}}.
 
-Here is an example of the catalog object for a resource.
+Here is an example of a catalog version for a resource.
 
 ```
 Catalog Track, Group 1720367990000, Object ID 0
 {
   "version": "1",
-  "attributes": { "location": "us-east-2", "os": "ubuntu20.4" },
-  "tracks": {
-    "4": [
-      { "index": 1, "name": "cpu_usage_percentage",
-        "type": "gauge", "repr": "int", "unit": "%" },
-      { "index": 2, "name": "cpu_temperature",
-        "type": "gauge", "repr": "float", "unit": "Cel" }
-    ]
-  }
+  "attributes": { "location": "us-east-2", "os": "ubuntu20.4" }
+}
+
+Catalog Track, Group 1720367990000, Object ID 1
+{
+  "name": "cpu_usage_percentage",
+  "type": "gauge", "repr": "int", "unit": "%"
+}
+
+Catalog Track, Group 1720367990000, Object ID 2
+{
+  "name": "cpu_temperature",
+  "type": "gauge", "repr": "float", "unit": "Cel"
 }
 ```
 
@@ -543,7 +572,8 @@ timestamp, cpu_usage_percentage and cpu_temperature metric values.
 ```
 Track 4, Group 1720367991000, Object ID 0
 {
-  "capture_timestamp": 1720367991000123456
+  "capture_timestamp": 1720367991000123456,
+  "catalog": 1720367990000
 }
 
 Track 4, Group 1720367991000, Object ID 1
@@ -564,7 +594,8 @@ cpu_temperature is reported. The first object carries Prior Group ID Gap
 ```
 Track 4, Group 1720367992000, Object ID 0
 {
-  "capture_timestamp": 1720367992000004211
+  "capture_timestamp": 1720367992000004211,
+  "catalog": 1720367990000
 }
 
 Track 4, Group 1720367992000, Object ID 2
@@ -621,7 +652,8 @@ security considerations of {{MOQT}} apply.
   full 64-bit value.
 
 * Groups are self-contained. Attributes and metric names moved to a
-  catalog track, and metrics are identified by stable Object IDs, which
+  catalog track with one object per metric, and each data group refers
+  to the catalog version that maps its Object IDs to metrics, which
   removes the dependency on previous groups.
 
 * Added the use of Prior Group ID Gap, subgroups and datagrams, Track
