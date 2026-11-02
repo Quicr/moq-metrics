@@ -82,7 +82,6 @@ Table of Contents
        5.11.1.  Catalog
        5.11.2.  Data
        5.11.3.  Result
-       5.11.4.  Encoding
    6.  Use with MSF
    7.  IANA Considerations
    8.  Security Considerations
@@ -739,23 +738,6 @@ Table of Contents
        +--------------------+----------------------+-------+------+
 
                        Table 2: Decoded time series
-
-5.11.4.  Encoding
-
-   The payloads of Objects 0, 1 and 2 of Group 1720367991000 are encoded
-   as follows:
-
-   Object 0 (Capture Info), 4 bytes
-     c1 e2 40                   Capture Timestamp Offset = 123456 (vi64)
-     01                         Catalog Version = 1 (vi64)
-
-   Object 1 (Metric Value, unsigned), 1 byte
-     63                         99 (vi64)
-
-   Object 2 (Metric Value, float), 8 bytes
-     40 46 8c cc cc cc cc cd    45.1 (IEEE 754 binary64)
-
-                     Figure 6: Encoded payload example
 
 6.  Use with MSF
 

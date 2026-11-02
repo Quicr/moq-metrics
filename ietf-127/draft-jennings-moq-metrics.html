@@ -1222,9 +1222,6 @@ information over the Media Over QUIC Transport (MOQT).<a href="#section-abstract
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11.2.3">
                     <p id="section-toc.1-1.5.2.11.2.3.1"><a href="#section-5.11.3" class="auto internal xref">5.11.3</a>.  <a href="#name-result" class="internal xref">Result</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11.2.4">
-                    <p id="section-toc.1-1.5.2.11.2.4.1"><a href="#section-5.11.4" class="auto internal xref">5.11.4</a>.  <a href="#name-encoding" class="internal xref">Encoding</a></p>
-</li>
                 </ul>
 </li>
             </ul>
@@ -2103,32 +2100,6 @@ following time series (<a href="#model" class="auto internal xref">Section 4</a>
               </tr>
             </tbody>
           </table>
-</section>
-</div>
-<div id="example-encoding">
-<section id="section-5.11.4">
-          <h4 id="name-encoding">
-<a href="#section-5.11.4" class="section-number selfRef">5.11.4. </a><a href="#name-encoding" class="section-name selfRef">Encoding</a>
-          </h4>
-<p id="section-5.11.4-1">The payloads of Objects 0, 1 and 2 of Group 1720367991000 are encoded as
-follows:<a href="#section-5.11.4-1" class="pilcrow">¶</a></p>
-<span id="name-encoded-payload-example"></span><figure id="figure-6">
-            <div class="alignLeft art-text artwork" id="section-5.11.4-2.1">
-<pre>
-Object 0 (Capture Info), 4 bytes
-  c1 e2 40                   Capture Timestamp Offset = 123456 (vi64)
-  01                         Catalog Version = 1 (vi64)
-
-Object 1 (Metric Value, unsigned), 1 byte
-  63                         99 (vi64)
-
-Object 2 (Metric Value, float), 8 bytes
-  40 46 8c cc cc cc cc cd    45.1 (IEEE 754 binary64)
-</pre>
-</div>
-<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
-<a href="#name-encoded-payload-example" class="selfRef">Encoded payload example</a>
-            </figcaption></figure>
 </section>
 </div>
 </section>
