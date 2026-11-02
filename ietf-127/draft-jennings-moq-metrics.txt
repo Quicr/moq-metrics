@@ -110,8 +110,7 @@ Table of Contents
    allows for a "just in time" delivery of metrics.
 
    This document specifies how to send metrics type information over the
-   Media Over QUIC Transport (MOQT).  This version is aligned with
-   draft-ietf-moq-transport-22.
+   Media Over QUIC Transport (MOQT).
 
 2.  Conventions and Definitions
 
