@@ -13,12 +13,12 @@ not all needed at the same time for consumption by collection/aggregation
 endpoints or may also compete for bandwidth with the primary application, thus
 exacerbating congestion conditions especially in low-bandwidth networks.
 Delivering these over architectures enabled by publish/subscribe transport like
-Media Over QUIC Transport (MOQT)  ,
+Media over QUIC Transport (MOQT)  ,
 allows metrics data to be prioritized within the congestion context of the
 primary application as well as enabling local
 nodes to cache the metric value to be later retrieved via new subscriptions. 
        This document specifies how to send metrics type
-information over the Media Over QUIC Transport (MOQT). 
+information over MOQT. 
     " name="description">
 <meta content="xml2rfc 3.34.1" name="generator">
 <meta content="metrics" name="keyword">
@@ -1097,12 +1097,12 @@ not all needed at the same time for consumption by collection/aggregation
 endpoints or may also compete for bandwidth with the primary application, thus
 exacerbating congestion conditions especially in low-bandwidth networks.
 Delivering these over architectures enabled by publish/subscribe transport like
-Media Over QUIC Transport (MOQT) <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>,
+Media over QUIC Transport (MOQT) <span>[<a href="#MOQT" class="cite xref">MOQT</a>]</span>,
 allows metrics data to be prioritized within the congestion context of the
 primary application as well as enabling local
 nodes to cache the metric value to be later retrieved via new subscriptions.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">This document specifies how to send metrics type
-information over the Media Over QUIC Transport (MOQT).<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+information over MOQT.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
@@ -1193,34 +1193,31 @@ information over the Media Over QUIC Transport (MOQT).<a href="#section-abstract
                 <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-groups-and-objects" class="internal xref">Groups and Objects</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
-                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="auto internal xref">5.5</a>.  <a href="#name-subgroups-and-datagrams" class="internal xref">Subgroups and Datagrams</a></p>
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="auto internal xref">5.5</a>.  <a href="#name-track-properties" class="internal xref">Track Properties</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.6">
-                <p id="section-toc.1-1.5.2.6.1"><a href="#section-5.6" class="auto internal xref">5.6</a>.  <a href="#name-track-properties" class="internal xref">Track Properties</a></p>
+                <p id="section-toc.1-1.5.2.6.1"><a href="#section-5.6" class="auto internal xref">5.6</a>.  <a href="#name-priorities" class="internal xref">Priorities</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.7">
-                <p id="section-toc.1-1.5.2.7.1"><a href="#section-5.7" class="auto internal xref">5.7</a>.  <a href="#name-priorities" class="internal xref">Priorities</a></p>
+                <p id="section-toc.1-1.5.2.7.1"><a href="#section-5.7" class="auto internal xref">5.7</a>.  <a href="#name-discovery-and-subscription" class="internal xref">Discovery and Subscription</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.8">
-                <p id="section-toc.1-1.5.2.8.1"><a href="#section-5.8" class="auto internal xref">5.8</a>.  <a href="#name-discovery-and-subscription" class="internal xref">Discovery and Subscription</a></p>
+                <p id="section-toc.1-1.5.2.8.1"><a href="#section-5.8" class="auto internal xref">5.8</a>.  <a href="#name-filtering" class="internal xref">Filtering</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.9">
-                <p id="section-toc.1-1.5.2.9.1"><a href="#section-5.9" class="auto internal xref">5.9</a>.  <a href="#name-filtering" class="internal xref">Filtering</a></p>
+                <p id="section-toc.1-1.5.2.9.1"><a href="#section-5.9" class="auto internal xref">5.9</a>.  <a href="#name-retrieval-of-past-metrics" class="internal xref">Retrieval of Past Metrics</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.10">
-                <p id="section-toc.1-1.5.2.10.1"><a href="#section-5.10" class="auto internal xref">5.10</a>. <a href="#name-retrieval-of-past-metrics" class="internal xref">Retrieval of Past Metrics</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11">
-                <p id="section-toc.1-1.5.2.11.1"><a href="#section-5.11" class="auto internal xref">5.11</a>. <a href="#name-examples" class="internal xref">Examples</a></p>
+                <p id="section-toc.1-1.5.2.10.1"><a href="#section-5.10" class="auto internal xref">5.10</a>. <a href="#name-examples" class="internal xref">Examples</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11.2.1">
-                    <p id="section-toc.1-1.5.2.11.2.1.1"><a href="#section-5.11.1" class="auto internal xref">5.11.1</a>.  <a href="#name-catalog" class="internal xref">Catalog</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.10.2.1">
+                    <p id="section-toc.1-1.5.2.10.2.1.1"><a href="#section-5.10.1" class="auto internal xref">5.10.1</a>.  <a href="#name-catalog" class="internal xref">Catalog</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11.2.2">
-                    <p id="section-toc.1-1.5.2.11.2.2.1"><a href="#section-5.11.2" class="auto internal xref">5.11.2</a>.  <a href="#name-data" class="internal xref">Data</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.10.2.2">
+                    <p id="section-toc.1-1.5.2.10.2.2.1"><a href="#section-5.10.2" class="auto internal xref">5.10.2</a>.  <a href="#name-data" class="internal xref">Data</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.11.2.3">
-                    <p id="section-toc.1-1.5.2.11.2.3.1"><a href="#section-5.11.3" class="auto internal xref">5.11.3</a>.  <a href="#name-result" class="internal xref">Result</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.10.2.3">
+                    <p id="section-toc.1-1.5.2.10.2.3.1"><a href="#section-5.10.3" class="auto internal xref">5.10.3</a>.  <a href="#name-result" class="internal xref">Result</a></p>
 </li>
                 </ul>
 </li>
@@ -1264,25 +1261,19 @@ information over the Media Over QUIC Transport (MOQT).<a href="#section-abstract
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">Systems often run into the problem when the network bandwidth
-for metrics is shared with the realtime media which impacts the media
-quality. This is especially true for realtime systems wherein metrics
-compete with bandwidth for media resulting in reduction of the
-available peak bandwidth for the primary application and often
-cause congestion in low-bandwidth networks. There is a desire to
-transport the metrics data at an appropriate priority level over the
-same transport as the application media. This allows the
-metrics data to take advantage of times when the media bitrate is below
-the peak rate while not impacting the peak rate available for media.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">Publishing metrics over architectures enabled via MOQT provides
-additional benefits of leveraging MOQT Relays as caches to store
-metrics in local nodes. This allows limiting the volume of
-data sent to the metrics collectors or aggregators. Instead, metrics that
-are frequently collected and reported can be cached in local nodes and a
-new subscription can fetch only the metrics that are needed. This allows for a
-"just in time" delivery of metrics.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">This document specifies how to send metrics type
-information over the Media Over QUIC Transport (MOQT).<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-1">Systems often share the network bandwidth used for metrics with
+realtime media, which impacts the media quality. Metrics compete with
+media for bandwidth, reducing the peak bandwidth available to the primary
+application and often causing congestion in low-bandwidth networks.
+There is a desire to transport metrics at an appropriate priority level
+over the same transport as the application media. This allows metrics to
+take advantage of times when the media bitrate is below the peak rate,
+without impacting the peak rate available for media.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Publishing metrics over MOQT also allows MOQT relays to act as caches
+that store metrics close to where they are produced. Instead of sending
+every metric to collectors, metrics can be cached in relays and retrieved
+only when needed, enabling "just in time" delivery of metrics
+(see <a href="#retrieval" class="auto internal xref">Section 5.9</a>).<a href="#section-1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1314,9 +1305,8 @@ metrics so that collectors can retrieve them later.<a href="#section-3-1" class=
 publishes its media and its metrics over the same MOQT session, and thus
 the same QUIC connection, to its ingress relay. Media and metrics share
 the congestion control context of that connection, and MOQT priorities
-(see <a href="#priorities" class="auto internal xref">Section 5.7</a>) determine what is sent when the available bandwidth
-is limited. Metrics use the bandwidth left over when the media bitrate is
-below the peak, without reducing the peak rate available for media.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+(see <a href="#priorities" class="auto internal xref">Section 5.6</a>) determine what is sent when the available bandwidth
+is limited.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-2">At the relay, media and metrics are forwarded to different destinations:
 media to the other participants, and metrics to a metrics collector,
 possibly through other relays. The relay does not need to treat the two
@@ -1340,7 +1330,7 @@ higher granularity metrics levels are the first to be delayed and, with
 OBJECT_DELIVERY_TIMEOUT, dropped, while media is unaffected. The relay
 continues to cache what it has received, and a collector can retrieve
 the metrics for a time window of interest later using FETCH
-(see <a href="#retrieval" class="auto internal xref">Section 5.10</a>).<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+(see <a href="#retrieval" class="auto internal xref">Section 5.9</a>).<a href="#section-3.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="arch-dedicated">
@@ -1368,13 +1358,10 @@ more metrics collectors subscribe to them.<a href="#section-3.2-1" class="pilcro
                                                       +-----------+
 </pre><a href="#section-3.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-3.2-3">Collectors discover endpoints using SUBSCRIBE_NAMESPACE and subscribe to
-the levels of interest of each endpoint (see <a href="#discovery" class="auto internal xref">Section 5.8</a>). Endpoints can publish all granularity levels to the
-nearby relay while only the lower granularity levels flow continuously to
-the collector. The higher granularity levels remain in the relay cache
-and are fetched only when needed, which limits the bandwidth used between
-the relay and the collector. Multiple consumers, such as a collector and
-a dashboard, can subscribe to the same tracks through relays without the
+<p id="section-3.2-3">Collectors discover endpoints and subscribe to the levels of interest
+(see <a href="#discovery" class="auto internal xref">Section 5.7</a>), while the remaining levels stay in relay caches until
+needed (see <a href="#retrieval" class="auto internal xref">Section 5.9</a>). Multiple consumers, such as a collector and a
+dashboard, can subscribe to the same tracks through relays without the
 endpoint sending the data more than once.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1396,7 +1383,7 @@ endpoint sending the data more than once.<a href="#section-3.2-3" class="pilcrow
    |                              +----&gt;|   Value: String    |
    |                              |     +--------------------+
    |    +------------------+      |
-   +---&gt;|Attributes [1..n] | -----+
+   +---&gt;|Attributes [0..n] | -----+
    |    +------------------+             +--------------------+
    |                              +-----&gt;|Metric Name: String |
    |                              |      +--------------------+
@@ -1409,24 +1396,23 @@ endpoint sending the data more than once.<a href="#section-3.2-3" class="pilcrow
 
 </pre><a href="#section-4-2" class="pilcrow">¶</a>
 </div>
-<p id="section-4-3">TODO: Define ABNF.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">The devices or systems publishing the metrics are referred  to as "Resources" and have an
-unique "ResourceID".<a href="#section-4-4" class="pilcrow">¶</a></p>
-<p id="section-4-5">Each metric reported by an <code>Resource</code> has an associated <code>timeseries</code>. A metric's timeseries
+<p id="section-4-3">The devices or systems publishing the metrics are referred  to as "Resources" and have an
+unique "ResourceID".<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">Each metric reported by a <code>Resource</code> has an associated <code>timeseries</code>. A metric's timeseries
 is time ordered set of values (observations at points in time) for the corresponding metric.
 Metric names are represented as strings and may contain ASCII letters, digits, underscores,
 and colon. A metric's value can be one of "Gauge" or "Counter". The "Gauge" value type
 represents a scalar  value that always represents the current value being measured. The "Counter"
 value type is a cumulative value that represents a single monotonically increasing value that can
 increase or be reset to zero on restart. The Gauge and Counter can represent either a 64-bit
-floating point value or a 64-bit integer value.<a href="#section-4-5" class="pilcrow">¶</a></p>
-<p id="section-4-6">Resources also define zero or more <code>Attributes</code>. Attributes capture the dimensional data to
+floating point value or a 64-bit integer value.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">Resources also define zero or more <code>Attributes</code>. Attributes capture the dimensional data to
 identify any given combination of them for the metrics reported by the resource.
-Attributes are represented as key-value pairs and represented as strings.<a href="#section-4-6" class="pilcrow">¶</a></p>
-<p id="section-4-7">The data model specified in this section is consistent with the "OpenTelemetry
-Specification 1.34.0" <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> for metrics when at rest (also known as
+Attributes are represented as key-value pairs and represented as strings.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-6">The data model specified in this section is consistent with the
+OpenTelemetry metrics data model <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> when at rest (also known as
 Timeseries model). See <a href="#moqt-mapping" class="auto internal xref">Section 5</a> for streaming model where
-MOQT is used for transporting the metric data.<a href="#section-4-7" class="pilcrow">¶</a></p>
+MOQT is used for transporting the metric data.<a href="#section-4-6" class="pilcrow">¶</a></p>
 <div id="resourceid">
 <section id="section-4.1">
         <h3 id="name-resourceid">
@@ -1434,11 +1420,11 @@ MOQT is used for transporting the metric data.<a href="#section-4-7" class="pilc
         </h3>
 <p id="section-4.1-1">Each resource that creates metrics has a unique "ResourceID". This is created by
 taking the MAC address of the primary network interface in binary,
-computing the sha1 hash of it, and truncating to lower 64 bits. Note the
-sha1 does not provide any security properties, it is just a hash that is
-widely implemented in hardware. If this is not possible, any other
-random stable 64 bit identifier may be used. The advantage of us MAC
-address is that many other management systems use this address and it
+computing the SHA-1 hash of it, and truncating to lower 64 bits. Note
+that SHA-1 does not provide any security properties here; it is just a
+hash that is widely implemented in hardware. If this is not possible, any
+other random stable 64-bit identifier <span class="bcp14">MAY</span> be used. The advantage of using
+the MAC address is that many other management systems use this address and it
 makes it easier to correlate. The disadvantage is that it reveals the
 MAC address.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.1-2">When carried in MOQT names, the ResourceID is encoded as exactly 16
@@ -1472,7 +1458,7 @@ the following three Track Namespace Fields, each encoded as ASCII:<a href="#sect
 </div>
 <p id="section-5.1-3">The Track Namespace Prefix <code>("metrics.moq.arpa", "v1")</code> is common to all
 resources, which allows a collector to discover all resources
-(see <a href="#discovery" class="auto internal xref">Section 5.8</a>). Within a resource's namespace the following tracks are
+(see <a href="#discovery" class="auto internal xref">Section 5.7</a>). Within a resource's namespace the following tracks are
 defined:<a href="#section-5.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.1-4.1">
@@ -1499,8 +1485,10 @@ metrics.2emoq.2earpa-v1-8f2c4a1b0e9d7c63--4
 <a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-granularity-levels" class="section-name selfRef">Granularity Levels</a>
         </h3>
 <p id="section-5.2-1">Following granularity levels are defined in this specification, along
-with their associated track names and <span class="bcp14">RECOMMENDED</span> default publisher
-priorities (see <a href="#priorities" class="auto internal xref">Section 5.7</a>).<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+with their associated track names and default publisher priorities
+(see <a href="#priorities" class="auto internal xref">Section 5.6</a>). Higher levels carry more detailed metrics: in this
+document, "lower levels" refers to Emergency (0) towards Error (3), and
+"higher levels" to Warning (4) towards Debug (7).<a href="#section-5.2-1" class="pilcrow">¶</a></p>
 <table class="center" id="table-1">
           <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
 <thead>
@@ -1576,7 +1564,7 @@ or that represent erroneous conditions, to use granularity that is one of
 Emergency, Alert, Critical and Error. Such metrics have characteristics of
 being less frequent and hence consume lesser bandwidth. Metrics that are
 captured more frequently and capture detailed view of system being measured
-typically are reported at granularity level of Warning and above. Such metrics,
+typically are reported at the Warning through Debug levels. Such metrics,
 however, consume high bandwidth when published.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1601,7 +1589,9 @@ with Metric Index N.<a href="#section-5.3-2.2.1" class="pilcrow">¶</a></p>
 the catalog group, and is also the Object ID that carries the metric's
 value in data groups (<a href="#groups" class="auto internal xref">Section 5.4</a>). It is not encoded in the Metric
 Description itself. Metric Indices are unique across all data tracks of
-the resource within a catalog version.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+the resource within a catalog version. A subscriber uses the Metric
+Description with index N to interpret Object ID N of any data group that
+refers to that catalog version.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
 <p id="section-5.3-4">The catalog header and metric description are encoded as follows, using
 the notation of <span><a href="https://rfc-editor.org/rfc/rfc9000#section-1.3" class="relref">Section 1.3</a> of [<a href="#RFC9000" class="cite xref">RFC9000</a>]</span> and the variable-length
 integer (vi64) of <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8.1" class="relref">Section 8.1</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
@@ -1639,7 +1629,6 @@ Attribute {
 Metric Description {
   Metric Type (vi64),
   Value Representation (vi64),
-  Subgroup ID (vi64),
   Name Length (vi64),
   Name (..),
   Unit Length (vi64),
@@ -1650,70 +1639,63 @@ Metric Description {
 <figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
 <a href="#name-metric-description-object-i" class="selfRef">Metric Description (Object ID N &gt; 0)</a>
           </figcaption></figure>
-<p id="section-5.3-8">A Metric Description is the payload of catalog Object ID N, for N &gt; 0.
-A subscriber uses it to interpret the data objects with Object ID N in any
-data group that refers to this catalog version: the Name and Metric Type
-identify the metric, and the Value Representation determines how the
-Metric Value is decoded.<a href="#section-5.3-8" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-9.1">
-            <p id="section-5.3-9.1.1">Metric Type: 0x0 for Gauge, 0x1 for Counter (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-9.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3-8.1">
+            <p id="section-5.3-8.1.1">Metric Type: 0x0 for Gauge, 0x1 for Counter (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-8.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-9.2">
-            <p id="section-5.3-9.2.1">Value Representation: The encoding of the metric value in data objects
+          <li class="normal" id="section-5.3-8.2">
+            <p id="section-5.3-8.2.1">Value Representation: The encoding of the metric value in data objects
 (see <a href="#groups" class="auto internal xref">Section 5.4</a>): 0x0 for an unsigned integer, 0x1 for a signed
-integer, 0x2 for a floating point number.<a href="#section-5.3-9.2.1" class="pilcrow">¶</a></p>
+integer, 0x2 for a floating point number.<a href="#section-5.3-8.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-9.3">
-            <p id="section-5.3-9.3.1">Subgroup ID: The Subgroup ID carrying the metric in data groups
-(see <a href="#subgroups" class="auto internal xref">Section 5.5</a>).<a href="#section-5.3-9.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-8.3">
+            <p id="section-5.3-8.3.1">Name: The metric name, in ASCII (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-8.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-9.4">
-            <p id="section-5.3-9.4.1">Name: The metric name, in ASCII (see <a href="#model" class="auto internal xref">Section 4</a>).<a href="#section-5.3-9.4.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.3-9.5">
-            <p id="section-5.3-9.5.1">Unit: The unit of the value following <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> conventions, or empty
-if not specified.<a href="#section-5.3-9.5.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-8.4">
+            <p id="section-5.3-8.4.1">Unit: The unit of the value following <span>[<a href="#OTEL" class="cite xref">OTEL</a>]</span> conventions, or empty
+if not specified.<a href="#section-5.3-8.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.3-10">Receivers <span class="bcp14">MUST</span> ignore any bytes following the fields defined in this
-document, to allow future extension.<a href="#section-5.3-10" class="pilcrow">¶</a></p>
-<p id="section-5.3-11">The Group ID of a catalog group is the catalog version number. The first
+<p id="section-5.3-9">Receivers <span class="bcp14">MUST</span> ignore any bytes following the fields defined in this
+document, to allow future extension.<a href="#section-5.3-9" class="pilcrow">¶</a></p>
+<p id="section-5.3-10">The Group ID of a catalog group is the catalog version number. The first
 version has Group ID 1, and each new version increments it by one, so the
 reference carried in every data group (see <a href="#groups" class="auto internal xref">Section 5.4</a>) stays small. The
 publisher <span class="bcp14">MUST</span> publish a catalog group before any data group that refers
-to it.<a href="#section-5.3-11" class="pilcrow">¶</a></p>
-<p id="section-5.3-12">Metric Indices are scoped to a catalog version: a new catalog version <span class="bcp14">MAY</span>
+to it.<a href="#section-5.3-10" class="pilcrow">¶</a></p>
+<p id="section-5.3-11">Metric Indices are scoped to a catalog version: a new catalog version <span class="bcp14">MAY</span>
 assign indices differently. Publishers <span class="bcp14">SHOULD</span> keep indices stable across
-versions, which keeps Object ID filters valid (see <a href="#filtering" class="auto internal xref">Section 5.9</a>) and
-allows unchanged metric descriptions to be reused.<a href="#section-5.3-12" class="pilcrow">¶</a></p>
-<p id="section-5.3-13">Because each metric is described by its own object, a subscriber does not
+versions, which keeps Object ID filters valid (see <a href="#filtering" class="auto internal xref">Section 5.8</a>) and
+allows unchanged metric descriptions to be reused.<a href="#section-5.3-11" class="pilcrow">¶</a></p>
+<p id="section-5.3-12">Because each metric is described by its own object, a subscriber does not
 need the complete catalog before decoding data. It can decode the value
 in data Object ID N as soon as it has catalog Object ID N of the referenced
 version, and it can retrieve only the descriptions it needs by applying
-the same Object ID filter to the catalog track as to the data track.<a href="#section-5.3-13" class="pilcrow">¶</a></p>
-<p id="section-5.3-14">A subscriber <span class="bcp14">SHOULD</span> subscribe to the catalog track in parallel with the
+the same Object ID filter to the catalog track as to the data track.<a href="#section-5.3-12" class="pilcrow">¶</a></p>
+<p id="section-5.3-13">A subscriber <span class="bcp14">SHOULD</span> subscribe to the catalog track in parallel with the
 data tracks, using FILL_PARAMETERS selecting the current group
 (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.5" class="relref">Section 3.5</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>), and hold data objects until the referenced
 catalog objects are received. Catalog versions rarely change, so
 subscribers <span class="bcp14">MAY</span> cache them per Track Namespace and catalog version and
 use a cached version without waiting. A subscriber that receives a data
 group referring to a catalog version it does not have retrieves it with
-FETCH.<a href="#section-5.3-14" class="pilcrow">¶</a></p>
-<p id="section-5.3-15">The catalog track <span class="bcp14">MUST</span> use subgroup delivery and <span class="bcp14">SHOULD</span> carry the
-following Track Properties:<a href="#section-5.3-15" class="pilcrow">¶</a></p>
+FETCH.<a href="#section-5.3-13" class="pilcrow">¶</a></p>
+<p id="section-5.3-14">The catalog track <span class="bcp14">MUST</span> use subgroup delivery and <span class="bcp14">SHOULD</span> carry the
+following Track Properties:<a href="#section-5.3-14" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.3-16.1">
-            <p id="section-5.3-16.1.1">MAX_CACHE_DURATION no shorter than that of any data track of the
-resource, so that cached data remains interpretable.<a href="#section-5.3-16.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.3-15.1">
+            <p id="section-5.3-15.1.1">MAX_CACHE_DURATION no shorter than that of any data track of the
+resource, so that cached data remains interpretable.<a href="#section-5.3-15.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-16.2">
-            <p id="section-5.3-16.2.1">DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
+          <li class="normal" id="section-5.3-15.2">
+            <p id="section-5.3-15.2.1">DEFAULT_PUBLISHER_PRIORITY numerically lower than that of any data
 track of the resource, so that catalog objects arrive ahead of the data
-that depends on them.<a href="#section-5.3-16.2.1" class="pilcrow">¶</a></p>
+that depends on them. This can place the catalog ahead of media using
+the default priority, which is acceptable given its small size and
+infrequent changes.<a href="#section-5.3-15.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.3-16.3">
-            <p id="section-5.3-16.3.1">No OBJECT_DELIVERY_TIMEOUT.<a href="#section-5.3-16.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.3-15.3">
+            <p id="section-5.3-15.3.1">No OBJECT_DELIVERY_TIMEOUT.<a href="#section-5.3-15.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -1728,7 +1710,7 @@ resource at one point in time. The Group ID is the capture time in
 milliseconds since the UNIX Epoch (00:00:00 UTC on 1 January 1970). This
 satisfies the requirement that Group IDs increase with time
 (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-2.3.1" class="relref">Section 2.3.1</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) and allows subscribers to
-express time ranges directly as Location filters (see <a href="#retrieval" class="auto internal xref">Section 5.10</a>).<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+express time ranges directly as Location filters (see <a href="#retrieval" class="auto internal xref">Section 5.9</a>).<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 <p id="section-5.4-2">Each group is independently useful: decoding a group requires only the
 objects in that group and the catalog version it refers to. Objects
 within a group are:<a href="#section-5.4-2" class="pilcrow">¶</a></p>
@@ -1762,9 +1744,7 @@ than 1000000.<a href="#section-5.4-5.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.4-5.2">
             <p id="section-5.4-5.2.1">Catalog Version: The Group ID of the catalog version used by this
-group. A subscriber that does not have this version holds the group
-and retrieves the version, so that it never interprets values with a
-stale catalog.<a href="#section-5.4-5.2.1" class="pilcrow">¶</a></p>
+group (see <a href="#catalog" class="auto internal xref">Section 5.3</a>).<a href="#section-5.4-5.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-5.4-6">The Metric Value is the entire object payload, encoded according to the
@@ -1787,219 +1767,167 @@ A subscriber or relay cannot infer anything from a missing Object ID
 (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-2.1.2" class="relref">Section 2.1.2</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>). The publisher <span class="bcp14">MUST</span> therefore include the
 Prior Object ID Gap Object Property (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-10.9" class="relref">Section 10.9</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) on the
 object that follows any skipped Object IDs, signaling that they do not
-exist in the group. Object IDs carried in another subgroup of the same
-group are not skipped. For skipped Object IDs after the last object of a group,
-the publisher <span class="bcp14">MUST</span> end the group with an object with the End of Group
-Object Status (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-11.1.1" class="relref">Section 11.1.1</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) and an Object ID one greater
-than the largest Object ID carrying a metric value, so that the receiver
-knows that no further metrics exist in the group. Object Status is not
+exist in the group. The publisher <span class="bcp14">MUST</span> also end each group with an
+object with the End of Group Object Status (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-11.1.1" class="relref">Section 11.1.1</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>)
+and an Object ID one greater than the largest Object ID carrying a metric
+value, so that the receiver knows that no further metrics exist in the
+group, including skipped metrics after the last value. Object Status is not
 carried in FETCH responses, which convey non-existent objects as
 described in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.2.2" class="relref">Section 3.2.2</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>.<a href="#section-5.4-8" class="pilcrow">¶</a></p>
 <p id="section-5.4-9">Resources typically do not capture metrics every millisecond, so Group IDs
 in a data track are sparse. The publisher <span class="bcp14">SHOULD</span> include the Prior Group ID
-Gap Object Property (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-10.8" class="relref">Section 10.8</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) on the
-first object of each subgroup, set to the number of milliseconds since the
-previous capture minus one. This allows relays and fetches to know that
+Gap Object Property (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-10.8" class="relref">Section 10.8</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) on Object 0, set to the
+number of milliseconds since the previous capture minus one. This allows relays and fetches to know that
 the intervening groups will never exist, rather than leaving them in the
 unknown state.<a href="#section-5.4-9" class="pilcrow">¶</a></p>
-<p id="section-5.4-10">Below is a conceptual representation of the MOQT mapping for the Warning
-(4) track of a resource.<a href="#section-5.4-10" class="pilcrow">¶</a></p>
-<div class="alignLeft art-ascii-art art-text artwork" id="section-5.4-11">
-<pre>
-Track: ("metrics.moq.arpa","v1",&lt;resourceID&gt;) / "4"
-
-  +----------------------+             +----------------------+
-  | Group (capture ms T1)|             | Group (capture ms TN)|
-  +----------------------+             +----------------------+
-    Subgroup 0                           Subgroup 0
-    +------------------------+          +------------------------+
-    | Object 0 (Capture      |          | Object 0 (Capture      |
-    |   Timestamp, Catalog)  |          |   Timestamp, Catalog)  |
-    +------------------------+          +------------------------+
-    +------------------------+          +------------------------+
-    | Object 1 (value of     |          | Object 1 (value of     |
-    |   metric index 1)      |   * * *  |   metric index 1)      |
-    +------------------------+          +------------------------+
-               *                                    *
-               *                                    *
-    +------------------------+          +------------------------+
-    | Object N (value of     |          | Object N (value of     |
-    |   metric index N)      |          |   metric index N)      |
-    +------------------------+          +------------------------+
-
-</pre><a href="#section-5.4-11" class="pilcrow">¶</a>
-</div>
-</section>
-</div>
-<div id="subgroups">
-<section id="section-5.5">
-        <h3 id="name-subgroups-and-datagrams">
-<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-subgroups-and-datagrams" class="section-name selfRef">Subgroups and Datagrams</a>
-        </h3>
-<p id="section-5.5-1">By default, a publisher <span class="bcp14">SHOULD</span> send all objects of a group in a single
-subgroup (Subgroup ID 0), which maps to a single stream.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
-<p id="section-5.5-2">A publisher <span class="bcp14">MAY</span> split the metrics of a group into multiple subgroups, for
-example to give a set of metrics a different publisher priority from the
-rest of the level, or to avoid head-of-line blocking between unrelated
-metrics. The assignment of metrics to subgroups <span class="bcp14">SHOULD</span> be consistent
-across groups, so that subscribers can select them using a Subgroup ID
-range filter. Since every metric object is independent of the others in
-its group, loss of a subgroup does not prevent use of the others; objects
-in subgroups other than the one carrying Object ID 0 use the Group ID as
-their capture time. They depend on Object ID 0 for the catalog version
-and are held until it is received.<a href="#section-5.5-2" class="pilcrow">¶</a></p>
-<p id="section-5.5-3">For levels where losing a sample is preferable to delaying it, such as
-Debug, publishers <span class="bcp14">MAY</span> send objects using the Datagram delivery mode.<a href="#section-5.5-3" class="pilcrow">¶</a></p>
+<p id="section-5.4-10">All objects of a group <span class="bcp14">MUST</span> be sent in a single subgroup with Subgroup ID
+0, so that Object 0 is delivered ahead of the values that depend on it.
+The Datagram delivery mode <span class="bcp14">MUST NOT</span> be used. An example of a group is
+shown in <a href="#examples" class="auto internal xref">Section 5.10</a>.<a href="#section-5.4-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="track-properties">
-<section id="section-5.6">
+<section id="section-5.5">
         <h3 id="name-track-properties">
-<a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-track-properties" class="section-name selfRef">Track Properties</a>
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-track-properties" class="section-name selfRef">Track Properties</a>
         </h3>
-<p id="section-5.6-1">Publishers <span class="bcp14">SHOULD</span> include the following Track Properties
-(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8.4" class="relref">Section 8.4</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) on each data track:<a href="#section-5.6-1" class="pilcrow">¶</a></p>
+<p id="section-5.5-1">Publishers <span class="bcp14">SHOULD</span> include the following Track Properties
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-8.4" class="relref">Section 8.4</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) on each data track:<a href="#section-5.5-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.6-2.1">
-            <p id="section-5.6-2.1.1">DEFAULT_PUBLISHER_PRIORITY: see <a href="#priorities" class="auto internal xref">Section 5.7</a>.<a href="#section-5.6-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.5-2.1">
+            <p id="section-5.5-2.1.1">DEFAULT_PUBLISHER_PRIORITY: see <a href="#priorities" class="auto internal xref">Section 5.6</a>.<a href="#section-5.5-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.6-2.2">
-            <p id="section-5.6-2.2.1">DEFAULT_PUBLISHER_GROUP_ORDER: Ascending (0x1), so that collectors
+          <li class="normal" id="section-5.5-2.2">
+            <p id="section-5.5-2.2.1">DEFAULT_PUBLISHER_GROUP_ORDER: Ascending (0x1), so that collectors
 receive samples in capture order. Subscribers interested only in the
 freshest value, such as live dashboards, <span class="bcp14">MAY</span> request Descending group
-order.<a href="#section-5.6-2.2.1" class="pilcrow">¶</a></p>
+order.<a href="#section-5.5-2.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.6-2.3">
-            <p id="section-5.6-2.3.1">MAX_CACHE_DURATION: the retention time for which relays may serve
+          <li class="normal" id="section-5.5-2.3">
+            <p id="section-5.5-2.3.1">MAX_CACHE_DURATION: the retention time for which relays may serve
 cached samples. Lower granularity levels are typically retained longer
-than higher granularity levels.<a href="#section-5.6-2.3.1" class="pilcrow">¶</a></p>
+than higher granularity levels.<a href="#section-5.5-2.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.6-2.4">
-            <p id="section-5.6-2.4.1">OBJECT_DELIVERY_TIMEOUT: for high granularity levels, a timeout after
-which a stale sample is dropped rather than delivered late.<a href="#section-5.6-2.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.5-2.4">
+            <p id="section-5.5-2.4.1">OBJECT_DELIVERY_TIMEOUT: for high granularity levels, a timeout after
+which a stale sample is dropped rather than delivered late.<a href="#section-5.5-2.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
 </div>
 <div id="priorities">
-<section id="section-5.7">
+<section id="section-5.6">
         <h3 id="name-priorities">
-<a href="#section-5.7" class="section-number selfRef">5.7. </a><a href="#name-priorities" class="section-name selfRef">Priorities</a>
+<a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-priorities" class="section-name selfRef">Priorities</a>
         </h3>
-<p id="section-5.7-1">Metrics are expected to yield to the primary application under
+<p id="section-5.6-1">Metrics are expected to yield to the primary application under
 congestion. The publisher <span class="bcp14">SHOULD</span> set the DEFAULT_PUBLISHER_PRIORITY Track
 Property of each data track to the value in <a href="#levels" class="auto internal xref">Section 5.2</a>, or another value
 that keeps lower granularity levels ahead of higher granularity levels.
 These values are in the lower priority half of the range, behind the
 MOQT default of 128 typically used for media, with Emergency at par with
-the default.<a href="#section-5.7-1" class="pilcrow">¶</a></p>
-<p id="section-5.7-2">Subscribers can adjust the relative importance of metrics against other
+the default.<a href="#section-5.6-1" class="pilcrow">¶</a></p>
+<p id="section-5.6-2">Subscribers can adjust the relative importance of metrics against other
 subscriptions in the session using the SUBSCRIBER_PRIORITY parameter,
-which is considered before publisher priority.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
+which is considered before publisher priority.<a href="#section-5.6-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="discovery">
-<section id="section-5.8">
+<section id="section-5.7">
         <h3 id="name-discovery-and-subscription">
-<a href="#section-5.8" class="section-number selfRef">5.8. </a><a href="#name-discovery-and-subscription" class="section-name selfRef">Discovery and Subscription</a>
+<a href="#section-5.7" class="section-number selfRef">5.7. </a><a href="#name-discovery-and-subscription" class="section-name selfRef">Discovery and Subscription</a>
         </h3>
-<p id="section-5.8-1">A collector discovers resources by sending SUBSCRIBE_NAMESPACE with the
+<p id="section-5.7-1">A collector discovers resources by sending SUBSCRIBE_NAMESPACE with the
 Track Namespace Prefix <code>("metrics.moq.arpa", "v1")</code>. The relay responds
 with a NAMESPACE message for each resource namespace, and NAMESPACE_DONE
-when a resource stops publishing.<a href="#section-5.8-1" class="pilcrow">¶</a></p>
-<p id="section-5.8-2">For each discovered resource, the collector subscribes by name to the
+when a resource stops publishing.<a href="#section-5.7-1" class="pilcrow">¶</a></p>
+<p id="section-5.7-2">For each discovered resource, the collector subscribes by name to the
 catalog track and to the data tracks of the levels it wants to receive
 continuously, for example levels 0 to 3. Resources that start publishing
 later are learned from subsequent NAMESPACE messages. Tracks of other
 levels are not subscribed to and remain available from the relay cache
-via FETCH (see <a href="#retrieval" class="auto internal xref">Section 5.10</a>).<a href="#section-5.8-2" class="pilcrow">¶</a></p>
+via FETCH (see <a href="#retrieval" class="auto internal xref">Section 5.9</a>).<a href="#section-5.7-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="filtering">
-<section id="section-5.9">
+<section id="section-5.8">
         <h3 id="name-filtering">
-<a href="#section-5.9" class="section-number selfRef">5.9. </a><a href="#name-filtering" class="section-name selfRef">Filtering</a>
+<a href="#section-5.8" class="section-number selfRef">5.8. </a><a href="#name-filtering" class="section-name selfRef">Filtering</a>
         </h3>
-<p id="section-5.9-1">MOQT Range Filters (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.3.2" class="relref">Section 3.3.2</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) carried
+<p id="section-5.8-1">MOQT Range Filters (<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.3.2" class="relref">Section 3.3.2</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>) carried
 in SUBSCRIBE, FETCH or FILL_PARAMETERS allow a collector to further reduce
-the data delivered within a track:<a href="#section-5.9-1" class="pilcrow">¶</a></p>
+the data delivered within a track:<a href="#section-5.8-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.9-2.1">
-            <p id="section-5.9-2.1.1">An Object ID range filter selects specific metrics by Metric Index.
-The filter <span class="bcp14">SHOULD</span> include Object ID 0. For example, ranges <code>[0, 0]</code> and
+<li class="normal" id="section-5.8-2.1">
+            <p id="section-5.8-2.1.1">An Object ID range filter selects specific metrics by Metric Index.
+The filter <span class="bcp14">MUST</span> include Object ID 0, which identifies the catalog
+version. For example, ranges <code>[0, 0]</code> and
 <code>[3, 5]</code> deliver Object 0 and the metrics with indices 3 to 5. The same
 filter applied to the catalog track delivers only the catalog header
 and the descriptions of those metrics. A subscriber updates its filters
-when a new catalog version assigns indices differently.<a href="#section-5.9-2.1.1" class="pilcrow">¶</a></p>
+when a new catalog version assigns indices differently.<a href="#section-5.8-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.9-2.2">
-            <p id="section-5.9-2.2.1">A Subgroup ID or Publisher Priority range filter selects the metrics
-that the publisher consistently places in particular subgroups
-(see <a href="#subgroups" class="auto internal xref">Section 5.5</a>).<a href="#section-5.9-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.9-2.3">
-            <p id="section-5.9-2.3.1">An Object Property range filter selects individual samples based on
+          <li class="normal" id="section-5.8-2.2">
+            <p id="section-5.8-2.2.1">An Object Property range filter selects individual samples based on
 application-defined Object Properties. For example, an application can
 mark samples that cross a configured threshold with an Object Property
 from the application-specific range, so that a collector subscribed to
 a high granularity level receives only those samples. Such properties
-are outside the scope of this document.<a href="#section-5.9-2.3.1" class="pilcrow">¶</a></p>
+are outside the scope of this document.<a href="#section-5.8-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.9-3">Range Filters are only available when the relay advertises a non-zero
+<p id="section-5.8-3">Range Filters are only available when the relay advertises a non-zero
 MAX_FILTER_RANGES. Collectors therefore treat filtering as an
-optimization and <span class="bcp14">MUST</span> be able to process unfiltered tracks.<a href="#section-5.9-3" class="pilcrow">¶</a></p>
+optimization and <span class="bcp14">MUST</span> be able to process unfiltered tracks.<a href="#section-5.8-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="retrieval">
-<section id="section-5.10">
+<section id="section-5.9">
         <h3 id="name-retrieval-of-past-metrics">
-<a href="#section-5.10" class="section-number selfRef">5.10. </a><a href="#name-retrieval-of-past-metrics" class="section-name selfRef">Retrieval of Past Metrics</a>
+<a href="#section-5.9" class="section-number selfRef">5.9. </a><a href="#name-retrieval-of-past-metrics" class="section-name selfRef">Retrieval of Past Metrics</a>
         </h3>
-<p id="section-5.10-1">Since Group IDs are capture times in milliseconds, a time range of
-metrics corresponds directly to a range of Locations:<a href="#section-5.10-1" class="pilcrow">¶</a></p>
+<p id="section-5.9-1">Since Group IDs are capture times in milliseconds, a time range of
+metrics corresponds directly to a range of Locations:<a href="#section-5.9-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.10-2.1">
-            <p id="section-5.10-2.1.1">A collector retrieves past samples for a time window <code>[T1, T2]</code> by
+<li class="normal" id="section-5.9-2.1">
+            <p id="section-5.9-2.1.1">A collector retrieves past samples for a time window <code>[T1, T2]</code> by
 sending FETCH with a Location filter from {T1, 0} to {T2, max}. The
-request is served from the relay cache, subject to MAX_CACHE_DURATION.<a href="#section-5.10-2.1.1" class="pilcrow">¶</a></p>
+request is served from the relay cache, subject to MAX_CACHE_DURATION.<a href="#section-5.9-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.10-2.2">
-            <p id="section-5.10-2.2.1">A collector that wants recent history followed by live samples sends a
+          <li class="normal" id="section-5.9-2.2">
+            <p id="section-5.9-2.2.1">A collector that wants recent history followed by live samples sends a
 SUBSCRIBE with a Location filter starting at the Next Object, together
 with FILL_PARAMETERS whose Location filter selects the starting point
 of the history. The relay delivers the history on a fill fetch stream
 and live samples on the subscription, without gaps or duplicates
-(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.4" class="relref">Section 3.4</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>).<a href="#section-5.10-2.2.1" class="pilcrow">¶</a></p>
+(<span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-moq-transport-22#section-3.4" class="relref">Section 3.4</a> of [<a href="#MOQT" class="cite xref">MOQT</a>]</span>).<a href="#section-5.9-2.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-5.10-2.3">
-            <p id="section-5.10-2.3.1">A collector that only needs live samples subscribes with a Location
-filter starting at the Next Group.<a href="#section-5.10-2.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-5.9-2.3">
+            <p id="section-5.9-2.3.1">A collector that only needs live samples subscribes with a Location
+filter starting at the Next Group.<a href="#section-5.9-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.10-3">This enables the "just in time" collection model: resources publish all
+<p id="section-5.9-3">This enables the "just in time" collection model: resources publish all
 levels to a nearby relay, while collectors subscribe to the low
 granularity levels and fetch the high granularity levels for the time
-windows of interest, for example around an alert.<a href="#section-5.10-3" class="pilcrow">¶</a></p>
+windows of interest, for example around an alert.<a href="#section-5.9-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="examples">
-<section id="section-5.11">
+<section id="section-5.10">
         <h3 id="name-examples">
-<a href="#section-5.11" class="section-number selfRef">5.11. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
+<a href="#section-5.10" class="section-number selfRef">5.10. </a><a href="#name-examples" class="section-name selfRef">Examples</a>
         </h3>
-<p id="section-5.11-1">This example follows a resource that reports two metrics on its Warning
-level track: <code>cpu_usage_percentage</code> and <code>cpu_temperature</code>.<a href="#section-5.11-1" class="pilcrow">¶</a></p>
+<p id="section-5.10-1">This example follows a resource that reports two metrics on its Warning
+level track: <code>cpu_usage_percentage</code> and <code>cpu_temperature</code>.<a href="#section-5.10-1" class="pilcrow">¶</a></p>
 <div id="example-catalog">
-<section id="section-5.11.1">
+<section id="section-5.10.1">
           <h4 id="name-catalog">
-<a href="#section-5.11.1" class="section-number selfRef">5.11.1. </a><a href="#name-catalog" class="section-name selfRef">Catalog</a>
+<a href="#section-5.10.1" class="section-number selfRef">5.10.1. </a><a href="#name-catalog" class="section-name selfRef">Catalog</a>
           </h4>
-<p id="section-5.11.1-1">The resource publishes catalog version 1 as Group 1 of its catalog track.
-Each metric is described by its own object, and the Object ID is the
-Metric Index used in data groups.<a href="#section-5.11.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.10.1-1">The resource publishes catalog version 1 as Group 1 of its catalog track.<a href="#section-5.10.1-1" class="pilcrow">¶</a></p>
 <span id="name-catalog-track-example"></span><figure id="figure-4">
-            <div class="alignLeft art-ascii-art art-text artwork" id="section-5.11.1-2.1">
+            <div class="alignLeft art-ascii-art art-text artwork" id="section-5.10.1-2.1">
 <pre>
 Track "catalog", Group 1 (catalog version 1)
 
@@ -2017,15 +1945,15 @@ Track "catalog", Group 1 (catalog version 1)
 </section>
 </div>
 <div id="example-data">
-<section id="section-5.11.2">
+<section id="section-5.10.2">
           <h4 id="name-data">
-<a href="#section-5.11.2" class="section-number selfRef">5.11.2. </a><a href="#name-data" class="section-name selfRef">Data</a>
+<a href="#section-5.10.2" class="section-number selfRef">5.10.2. </a><a href="#name-data" class="section-name selfRef">Data</a>
           </h4>
-<p id="section-5.11.2-1">The resource captures both metrics at 15:59:51.000123456 UTC on 7 July
+<p id="section-5.10.2-1">The resource captures both metrics at 15:59:51.000123456 UTC on 7 July
 2024 (Group 1720367991000). One second later it captures only
-<code>cpu_temperature</code> (Group 1720367992000).<a href="#section-5.11.2-1" class="pilcrow">¶</a></p>
+<code>cpu_temperature</code> (Group 1720367992000).<a href="#section-5.10.2-1" class="pilcrow">¶</a></p>
 <span id="name-data-track-example"></span><figure id="figure-5">
-            <div class="alignLeft art-ascii-art art-text artwork" id="section-5.11.2-2.1">
+            <div class="alignLeft art-ascii-art art-text artwork" id="section-5.10.2-2.1">
 <pre>
 Track "4", Group 1720367991000
 
@@ -2059,13 +1987,13 @@ Track "4", Group 1720367992000
 </section>
 </div>
 <div id="example-result">
-<section id="section-5.11.3">
+<section id="section-5.10.3">
           <h4 id="name-result">
-<a href="#section-5.11.3" class="section-number selfRef">5.11.3. </a><a href="#name-result" class="section-name selfRef">Result</a>
+<a href="#section-5.10.3" class="section-number selfRef">5.10.3. </a><a href="#name-result" class="section-name selfRef">Result</a>
           </h4>
-<p id="section-5.11.3-1">A collector holding catalog version 1 turns the two groups into the
+<p id="section-5.10.3-1">A collector holding catalog version 1 turns the two groups into the
 following time series (<a href="#model" class="auto internal xref">Section 4</a>), with capture times in UTC on 7 July
-2024:<a href="#section-5.11.3-1" class="pilcrow">¶</a></p>
+2024:<a href="#section-5.10.3-1" class="pilcrow">¶</a></p>
 <span id="name-decoded-time-series"></span><table class="center" id="table-2">
             <caption>
 <a href="#table-2" class="selfRef">Table 2</a>:
@@ -2207,35 +2135,39 @@ and <code>token</code> of the entry apply to the catalog track as well.<a href="
           <p id="appendix-A-1.1.1">Aligned with draft-ietf-moq-transport-22.<a href="#appendix-A-1.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-1.2">
-          <p id="appendix-A-1.2.1">Track Namespace is now the tuple ("metrics.moq.arpa", "v1",
-resourceID); the string form uses the MOQT serialization format
-instead of a moq:// URL.<a href="#appendix-A-1.2.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-1.2.1">Added an Architecture Overview describing metrics sharing a session
+with media, and metrics as the primary data.<a href="#appendix-A-1.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-1.3">
-          <p id="appendix-A-1.3.1">Group ID is the capture time in milliseconds since the UNIX Epoch as a
-full 64-bit value.<a href="#appendix-A-1.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-1.3.1">Track Namespace is now the tuple ("metrics.moq.arpa", "v1",
+resourceID); the string form uses the MOQT serialization format
+instead of a moq:// URL.<a href="#appendix-A-1.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-1.4">
-          <p id="appendix-A-1.4.1">Groups are self-contained. Attributes and metric names moved to a
-catalog track with one object per metric, and each data group refers
-to the catalog version that maps its Object IDs to metrics, which
-removes the dependency on previous groups.<a href="#appendix-A-1.4.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-1.4.1">Group ID is the capture time in milliseconds since the UNIX Epoch as a
+full 64-bit value.<a href="#appendix-A-1.4.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-1.5">
-          <p id="appendix-A-1.5.1">Added the use of Prior Group ID Gap, subgroups and datagrams, Track
-Properties for priority, group order, caching and delivery timeouts,
-SUBSCRIBE_NAMESPACE for discovery, range filters for metric selection,
-and FETCH and fill for time range retrieval.<a href="#appendix-A-1.5.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-1.5.1">Attributes and metric names moved to a versioned catalog track with
+one object per metric. Each data group refers to the catalog version
+that maps its Object IDs to metrics, which removes the dependency on
+previous groups.<a href="#appendix-A-1.5.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-1.6">
-          <p id="appendix-A-1.6.1">Specified the catalog format and added use with MSF.<a href="#appendix-A-1.6.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-1.6.1">Object payloads use a binary encoding following the MOQT notation.<a href="#appendix-A-1.6.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-1.7">
-          <p id="appendix-A-1.7.1">Object payloads use a binary encoding following the MOQT notation.<a href="#appendix-A-1.7.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-1.7.1">Each group is sent as a single subgroup, ending with an End of Group
+object, and skipped metrics are signaled with Prior Object ID Gap.<a href="#appendix-A-1.7.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-A-1.8">
-          <p id="appendix-A-1.8.1">Added an Architecture Overview describing metrics sharing a session
-with media, and metrics as the primary data.<a href="#appendix-A-1.8.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-1.8.1">Added the use of Prior Group ID Gap, Track Properties for priority,
+group order, caching and delivery timeouts, SUBSCRIBE_NAMESPACE for
+discovery, range filters for metric selection, and FETCH and fill for
+time range retrieval.<a href="#appendix-A-1.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-A-1.9">
+          <p id="appendix-A-1.9.1">Added use with MSF.<a href="#appendix-A-1.9.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
