@@ -691,6 +691,8 @@ Table of Contents
       +--------+--------------+-------------------------------------+
       |   2    | Metric Value | 45.1 (cpu_temperature)              |
       +--------+--------------+-------------------------------------+
+      |   3    | End of Group | Object Status 0x3, no payload       |
+      +--------+--------------+-------------------------------------+
 
                 Table 3: Warning track, Group 1720367991000
 
@@ -705,6 +707,8 @@ Table of Contents
        |   0    | Capture Info | Offset 4211 ns; Catalog Version 1 |
        +--------+--------------+-----------------------------------+
        |   2    | Metric Value | 44.8 (cpu_temperature)            |
+       +--------+--------------+-----------------------------------+
+       |   3    | End of Group | Object Status 0x3, no payload     |
        +--------+--------------+-----------------------------------+
 
                 Table 4: Warning track, Group 1720367992000
