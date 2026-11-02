@@ -495,9 +495,12 @@ Table of Contents
 
    A resource that does not report a given metric at a capture time
    simply omits that object.  A subscriber or relay cannot infer
-   anything from a missing Object ID (Section 2.1.2 of [MOQT]); a
-   publisher MAY use the Prior Object ID Gap Object Property to signal
-   that skipped Object IDs do not exist.
+   anything from a missing Object ID (Section 2.1.2 of [MOQT]).  The
+   publisher MUST therefore include the Prior Object ID Gap Object
+   Property (Section 10.9 of [MOQT]) on the object that follows any
+   skipped Object IDs, signaling that they do not exist in the group.
+   Object IDs carried in another subgroup of the same group are not
+   skipped.
 
    Resources typically do not capture metrics every millisecond, so
    Group IDs in a data track are sparse.  The publisher SHOULD include
