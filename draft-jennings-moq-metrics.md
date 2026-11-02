@@ -456,7 +456,11 @@ A subscriber or relay cannot infer anything from a missing Object ID
 Prior Object ID Gap Object Property ({{Section 10.9 of MOQT}}) on the
 object that follows any skipped Object IDs, signaling that they do not
 exist in the group. Object IDs carried in another subgroup of the same
-group are not skipped.
+group are not skipped. For skipped Object IDs after the last object of a group,
+the publisher MUST set the END_OF_GROUP bit in the header of the subgroup
+that contains the largest Object ID of the group and end that subgroup
+with a FIN ({{Section 11.3.1 of MOQT}}), so that the receiver knows that
+no further metrics exist in the group.
 
 Resources typically do not capture metrics every millisecond, so Group IDs
 in a data track are sparse. The publisher SHOULD include the Prior Group ID
