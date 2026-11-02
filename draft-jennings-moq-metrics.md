@@ -634,6 +634,7 @@ The following examples show decoded object payloads.
 | 0      | Capture Info | Offset 123456 ns; Catalog Version 1 |
 | 1      | Metric Value | 99 (cpu_usage_percentage)                   |
 | 2      | Metric Value | 45.1 (cpu_temperature)                      |
+| 3      | End of Group | Object Status 0x3, no payload               |
 {: title="Warning track, Group 1720367991000"}
 
 One second later, only cpu_temperature is reported. Object 0 carries
@@ -645,6 +646,7 @@ Object 1 does not exist in this group.
 |:------:|:-------------|:------------------------------------------|
 | 0      | Capture Info | Offset 4211 ns; Catalog Version 1 |
 | 2      | Metric Value | 44.8 (cpu_temperature)                    |
+| 3      | End of Group | Object Status 0x3, no payload             |
 {: title="Warning track, Group 1720367992000"}
 
 The Capture Info of Group 1720367991000 is encoded in 4 bytes:
