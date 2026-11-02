@@ -620,41 +620,91 @@ windows of interest, for example around an alert.
 
 ## Examples
 
-The following examples show decoded object payloads.
+This example follows a resource that reports two metrics on its Warning
+level track: `cpu_usage_percentage` and `cpu_temperature`.
 
-| Object | Structure          | Content                                       |
-|:------:|:-------------------|:----------------------------------------------|
-| 0      | Catalog Header     | Version 1; location = us-east-2, os = ubuntu20.4 |
-| 1      | Metric Description | cpu_usage_percentage; Gauge; unsigned; unit % |
-| 2      | Metric Description | cpu_temperature; Gauge; floating point; unit Cel |
-{: title="Catalog track, Group 1"}
+### Catalog {#example-catalog}
 
-| Object | Structure    | Content                                     |
-|:------:|:-------------|:--------------------------------------------|
-| 0      | Capture Info | Offset 123456 ns; Catalog Version 1 |
-| 1      | Metric Value | 99 (cpu_usage_percentage)                   |
-| 2      | Metric Value | 45.1 (cpu_temperature)                      |
-| 3      | End of Group | Object Status 0x3, no payload               |
-{: title="Warning track, Group 1720367991000"}
+The resource publishes catalog version 1 as Group 1 of its catalog track.
+Each metric is described by its own object, and the Object ID is the
+Metric Index used in data groups.
 
-One second later, only cpu_temperature is reported. Object 0 carries
-Prior Group ID Gap = 999, as Group IDs 1720367991001 to 1720367991999
-will never exist, and Object 2 carries Prior Object ID Gap = 1, as
-Object 1 does not exist in this group.
+~~~ ascii-art
+Track "catalog", Group 1 (catalog version 1)
 
-| Object | Structure    | Content                                   |
-|:------:|:-------------|:------------------------------------------|
-| 0      | Capture Info | Offset 4211 ns; Catalog Version 1 |
-| 2      | Metric Value | 44.8 (cpu_temperature)                    |
-| 3      | End of Group | Object Status 0x3, no payload             |
-{: title="Warning track, Group 1720367992000"}
+ Obj  Content
+ ---  ------------------------------------------------------------
+  0   Catalog Header      version 1
+                          location = us-east-2, os = ubuntu20.4
+  1   Metric Description  cpu_usage_percentage  Gauge  unsigned  %
+  2   Metric Description  cpu_temperature       Gauge  float     Cel
+~~~
+{: title="Catalog track example"}
 
-The Capture Info of Group 1720367991000 is encoded in 4 bytes:
+### Data {#example-data}
+
+The resource captures both metrics at 15:59:51.000123456 UTC on 7 July
+2024 (Group 1720367991000). One second later it captures only
+`cpu_temperature` (Group 1720367992000).
+
+~~~ ascii-art
+Track "4", Group 1720367991000
+
+ Obj  Content                       Meaning
+ ---  ----------------------------  ------------------------------
+  0   Capture Info                  captured 15:59:51.000123456,
+        offset 123456 ns            decode with catalog version 1
+        catalog 1
+  1   Metric Value  99              cpu_usage_percentage = 99 %
+  2   Metric Value  45.1            cpu_temperature = 45.1 Cel
+  3   End of Group                  no further metrics
+
+Track "4", Group 1720367992000
+
+ Obj  Content                       Meaning
+ ---  ----------------------------  ------------------------------
+  0   Capture Info                  captured 15:59:52.000004211,
+        offset 4211 ns              decode with catalog version 1
+        catalog 1
+        [Prior Group ID Gap 999]    no groups since previous one
+  2   Metric Value  44.8            cpu_temperature = 44.8 Cel
+        [Prior Object ID Gap 1]     Object 1 not reported
+  3   End of Group                  no further metrics
+
+[ ] denotes an Object Property.
+~~~
+{: title="Data track example"}
+
+### Result {#example-result}
+
+A collector holding catalog version 1 turns the two groups into the
+following time series ({{model}}), with capture times in UTC on 7 July
+2024:
+
+| Capture time       | Metric               | Value | Unit |
+|:-------------------|:---------------------|------:|:-----|
+| 15:59:51.000123456 | cpu_usage_percentage |    99 | %    |
+| 15:59:51.000123456 | cpu_temperature      |  45.1 | Cel  |
+| 15:59:52.000004211 | cpu_temperature      |  44.8 | Cel  |
+{: title="Decoded time series"}
+
+### Encoding {#example-encoding}
+
+The payloads of Objects 0, 1 and 2 of Group 1720367991000 are encoded as
+follows:
 
 ~~~
-c1 e2 40   Capture Timestamp Offset = 123456 (vi64)
-01         Catalog Version = 1 (vi64)
+Object 0 (Capture Info), 4 bytes
+  c1 e2 40                   Capture Timestamp Offset = 123456 (vi64)
+  01                         Catalog Version = 1 (vi64)
+
+Object 1 (Metric Value, unsigned), 1 byte
+  63                         99 (vi64)
+
+Object 2 (Metric Value, float), 8 bytes
+  40 46 8c cc cc cc cc cd    45.1 (IEEE 754 binary64)
 ~~~
+{: title="Encoded payload example"}
 
 # Use with MSF {#msf}
 
