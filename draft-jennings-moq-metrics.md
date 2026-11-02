@@ -301,7 +301,7 @@ the objects of data groups:
 
 The catalog header and metric description are encoded as follows, using
 the notation of {{Section 1.3 of !RFC9000}} and the variable-length
-integer (vi64) and Key-Value-Pair conventions of {{Section 8 of MOQT}}.
+integer (vi64) of {{Section 8.1 of MOQT}}.
 
 ~~~
 Catalog Header {
