@@ -78,8 +78,7 @@ new subscription can fetch only the metrics that are needed. This allows for a
 "just in time" delivery of metrics.
 
 This document specifies how to send metrics type
-information over the Media Over QUIC Transport (MOQT). This version
-is aligned with draft-ietf-moq-transport-22.
+information over the Media Over QUIC Transport (MOQT).
 
 
 # Conventions and Definitions
