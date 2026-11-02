@@ -713,11 +713,7 @@ This document has no IANA actions.
 
 # Security Considerations
 
-The ResourceID, when derived from a MAC address, can reveal that address
-(see {{resourceid}}). Resource attributes and metric values are
-carried in object payloads and can be protected end to end; Track Names,
-Group IDs (capture times) and Track Properties are visible to relays. The
-security considerations of {{MOQT}} apply.
+TODO
 
 --- back
 
